@@ -193,6 +193,8 @@ if CLOUDINARY_URL:
         MEDIA_URL = f'https://res.cloudinary.com/{cloudinary_cloud_name}/'
     MEDIA_ROOT = None
 
+X_FRAME_OPTIONS = 'ALLOWALL'
+
 JAZZMIN_SETTINGS = {
     "site_title": "GIH Admin",
     "site_header": "GIH Admin",
