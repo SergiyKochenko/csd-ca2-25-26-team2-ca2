@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Staff Registration | Great Irish Hotels{% endblock %}
+
+{% block content %}
+    {% include "header.html" %}
+
+    <main class="flex-grow-1 pt-5 mt-4">
+        <section class="auth-section py-5">
+            <div class="container py-4">
+                <div class="row g-4 align-items-center">
+                    <div class="col-12 col-lg-6">
+                        <div class="auth-visual h-100">
+                            <p class="text-uppercase small fw-semibold mb-2">Join the team</p>
+                            <h2 class="display-6 fw-bold mb-3">Empower your career with Great Irish Hotels</h2>
+                            <p class="mb-4">Register to access staff schedules, training resources, and the collaboration tools that keep our five-star service synchronized across Ireland.</p>
+                            <ul class="list-unstyled mb-0">
+                                <li class="d-flex align-items-center mb-2"><span class="badge rounded-pill bg-light text-dark me-3">1</span> Coordinate with departments in real time</li>
+                                <li class="d-flex align-items-center mb-2"><span class="badge rounded-pill bg-light text-dark me-3">2</span> Track performance goals and recognition</li>
+                                <li class="d-flex align-items-center"><span class="badge rounded-pill bg-light text-dark me-3">3</span> Access knowledge bases and SOPs</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <div class="card auth-card shadow-lg mx-auto">
+                            <div class="card-body p-4 p-md-5">
+                                <h2 class="h3 text-center fw-bold mb-4">Staff Registration</h2>
+                                {% if form and form.non_field_errors %}
+                                    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                                {% endif %}
+                                {% if success %}
+                                    <p class="text-success text-center">Registration successful!</p>
+                                {% endif %}
+                                <form method="post" class="auth-form">
+                                    {% csrf_token %}
+                                    <div class="form-floating mb-3">
+                                        <input type="text" name="name" id="name" value="{{ form.name.value|default_if_none:'' }}" class="form-control{% if form.name.errors %} is-invalid{% endif %}" placeholder="Full name" required>
+                                        <label for="name">Name</label>
+                                        {% if form.name.errors %}<div class="invalid-feedback">{{ form.name.errors|join:', ' }}</div>{% endif %}
+                                    </div>
+                                    <div class="form-floating mb-3">
+                                        <select name="role" id="role" class="form-select{% if form.role.errors %} is-invalid{% endif %}" required>
+                                            {% for choice in form.role.field.queryset %}
+                                                <option value="{{ choice.id }}" {% if form.role.value == choice.id|stringformat:'s' %}selected{% endif %}>{{ choice.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <label for="role">Role</label>
+                                        {% if form.role.errors %}<div class="invalid-feedback">{{ form.role.errors|join:', ' }}</div>{% endif %}
+                                    </div>
+                                    <div class="form-floating mb-3">
+                                        <input type="email" name="email" id="email" value="{{ form.email.value|default_if_none:'' }}" class="form-control{% if form.email.errors %} is-invalid{% endif %}" placeholder="name@example.com" required>
+                                        <label for="email">Email</label>
+                                        {% if form.email.errors %}<div class="invalid-feedback">{{ form.email.errors|join:', ' }}</div>{% endif %}
+                                    </div>
+                                    <div class="form-floating mb-4">
+                                        <input type="password" name="password" id="password" class="form-control{% if form.password.errors %} is-invalid{% endif %}" placeholder="Password" required>
+                                        <label for="password">Password</label>
+                                        {% if form.password.errors %}<div class="invalid-feedback">{{ form.password.errors|join:', ' }}</div>{% endif %}
+                                    </div>
+                                    <button type="submit" class="btn btn-gradient w-100 py-2 mb-3">Register</button>
+                                    <p class="text-center mb-0">Already registered? <a href="/housekeeper_login/" class="fw-semibold">Login here</a></p>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+{% endblock %}

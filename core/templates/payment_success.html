@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Payment Success | Great Irish Hotels{% endblock %}
+{% block content %}
+{% include "header.html" %}
+<main class="container py-5" style="margin-top:90px;">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="bi bi-check-circle me-2"></i>Payment Successful</h4>
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">Thank you! Your payment has been processed.</p>
+                    {% if stripe_session %}
+                        <ul class="list-group list-group-flush mb-3">
+                            <li class="list-group-item d-flex justify-content-between"><span>Session ID</span><span class="text-muted">{{ stripe_session.id }}</span></li>
+                            <li class="list-group-item d-flex justify-content-between"><span>Amount</span><span class="fw-semibold">{{ stripe_session.amount_total|floatformat:2 }} (in smallest currency units)</span></li>
+                            <li class="list-group-item d-flex justify-content-between"><span>Status</span><span class="badge bg-success">{{ stripe_session.status }}</span></li>
+                        </ul>
+                    {% endif %}
+                    <a class="btn btn-primary" href="/rooms/">Back to Rooms</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

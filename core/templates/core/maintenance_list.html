@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Maintenance Requests - Hotel Management{% endblock %}
+
+{% block content %}
+{% include "header.html" %}
+
+<main class="container py-5 maintenance-board">
+    <section class="maintenance-hero rounded-4 shadow-sm p-4 p-lg-5 mb-4">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-8">
+                <p class="text-uppercase text-white-50 fw-semibold mb-2">Operations</p>
+                <h2 class="text-white mb-2">Maintenance Requests</h2>
+                <p class="text-white-75 mb-0">Track requests with role-based access and clear status updates.</p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                {% if is_admin or is_guest_view %}
+                    <a href="{% url 'maintenance_create' %}" class="btn btn-light rounded-pill px-4">
+                        <i class="bi bi-plus-circle me-2"></i>{% if is_guest_view %}New Request{% else %}Create Request{% endif %}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="row g-3 mt-3 text-white">
+            <div class="col-12 col-md-4">
+                <div class="metric-tile">
+                    <p class="label">Total</p>
+                    <p class="value">{{ board_stats.total }}</p>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="metric-tile">
+                    <p class="label">Open</p>
+                    <p class="value">{{ board_stats.open }}</p>
+                </div>
+            </div>
+            {% if is_maintenance_staff %}
+            <div class="col-12 col-md-4">
+                <div class="metric-tile">
+                    <p class="label">Assigned to me</p>
+                    <p class="value">{{ board_stats.assigned_to_me }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if maintenance_requests %}
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Room</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Requested</th>
+                            {% if not is_guest_view %}<th>Guest</th>{% endif %}
+                            {% if not is_guest_view %}<th>Assigned</th>{% endif %}
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for req in maintenance_requests %}
+                            <tr>
+                                <td>#{{ req.id }}</td>
+                                <td>Room {{ req.room.number }}</td>
+                                <td>{{ req.get_type_display }}</td>
+                                <td>
+                                    <span class="status-pill status-{{ req.status }}">
+                                        {% if is_guest_view %}{{ req.guest_visible_status }}{% else %}{{ req.get_status_display }}{% endif %}
+                                    </span>
+                                </td>
+                                <td>{{ req.request_date|date:"M d, Y" }}</td>
+                                {% if not is_guest_view %}
+                                <td>{{ req.requested_by_name }}</td>
+                                <td>{{ req.assigned_to.name|default:"Unassigned" }}</td>
+                                {% endif %}
+                                <td class="text-end">
+                                    <div class="d-inline-flex gap-2">
+                                        <a href="{% url 'maintenance_detail' req.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye me-1"></i>View
+                                        </a>
+                                        {% if is_admin %}
+                                            <a href="{% url 'maintenance_update' req.id %}" class="btn btn-sm btn-outline-secondary">
+                                                <i class="bi bi-pencil me-1"></i>Update
+                                            </a>
+                                        {% elif is_maintenance_staff and req.assigned_to_id == staff_id %}
+                                            <a href="{% url 'maintenance_update' req.id %}" class="btn btn-sm btn-outline-secondary">
+                                                <i class="bi bi-pencil me-1"></i>Update
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center py-5">
+            <p class="mb-2">No maintenance requests yet.</p>
+            {% if is_guest_view or is_admin %}
+                <a href="{% url 'maintenance_create' %}" class="btn btn-primary">Create a request</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</main>
+
+{% endblock %}

@@ -1,0 +1,64 @@
+---
+name: "Test Case"
+description: "Document a test case for the project."
+title: "[TEST CASE] <short description>"
+labels: [test case]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Test Case
+        Please use the format below to describe your test case.
+  - type: input
+    id: test_title
+    attributes:
+      label: "Test Title"
+      description: "A concise title for the test case."
+      placeholder: "Login functionality test"
+    validations:
+      required: true
+  - type: textarea
+    id: preconditions
+    attributes:
+      label: "Preconditions"
+      description: "List any preconditions that must be met before executing the test."
+      placeholder: |
+        - User is registered
+        - User is on the login page
+    validations:
+      required: false
+  - type: textarea
+    id: steps
+    attributes:
+      label: "Test Steps"
+      description: "List the steps to execute the test."
+      placeholder: |
+        1. Enter username and password
+        2. Click the login button
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: "Expected Result"
+      description: "Describe the expected outcome of the test."
+      placeholder: "User is redirected to the dashboard."
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: "Actual Result"
+      description: "Describe the actual outcome after executing the test."
+      placeholder: "User receives an error message."
+    validations:
+      required: false
+  - type: textarea
+    id: additional
+    attributes:
+      label: "Additional Notes"
+      description: "Add any other context, attachments, or references."
+      placeholder: "Screenshots, logs, or related issues."
+    validations:
+      required: false

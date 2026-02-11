@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dining Menu - Great Irish Hotels</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body style="padding-top: 70px;">
+{% include "header.html" %}
+
+<div class="container my-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold">Dining Menu</h1>
+        <p class="lead">A Taste of Ireland: Fresh, Local, and Inspired</p>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h3 class="card-title mb-3 text-secondary">Starters</h3>
+                    <ul class="list-group list-group-flush mb-4">
+                        <li class="list-group-item">Seafood Chowder <span class="float-end">€8</span></li>
+                        <li class="list-group-item">Goat Cheese Salad <span class="float-end">€7</span></li>
+                        <li class="list-group-item">Smoked Salmon on Brown Bread <span class="float-end">€9</span></li>
+                    </ul>
+                    <h3 class="card-title mb-3 text-secondary">Main Courses</h3>
+                    <ul class="list-group list-group-flush mb-4">
+                        <li class="list-group-item">Roast Irish Lamb with Root Vegetables <span class="float-end">€18</span></li>
+                        <li class="list-group-item">Pan-Seared Atlantic Salmon <span class="float-end">€17</span></li>
+                        <li class="list-group-item">Vegetarian Shepherd’s Pie <span class="float-end">€15</span></li>
+                    </ul>
+                    <h3 class="card-title mb-3 text-secondary">Desserts</h3>
+                    <ul class="list-group list-group-flush mb-4">
+                        <li class="list-group-item">Baileys Cheesecake <span class="float-end">€6</span></li>
+                        <li class="list-group-item">Warm Apple Crumble <span class="float-end">€6</span></li>
+                        <li class="list-group-item">Chocolate Fondant <span class="float-end">€7</span></li>
+                    </ul>
+                    <h3 class="card-title mb-3 text-secondary">Beverages</h3>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">Irish Coffee <span class="float-end">€5</span></li>
+                        <li class="list-group-item">Selection of Teas & Coffees <span class="float-end">€3</span></li>
+                        <li class="list-group-item">Craft Beer <span class="float-end">€5</span></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="text-center">
+                <a href="/" class="btn btn-primary rounded-pill">Back to Home</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include "footer.html" %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+
+{% block title %}Maintenance Request #{{ object.id }}{% endblock %}
+
+{% block content %}
+{% include "header.html" %}
+
+<main class="container py-5 maintenance-detail">
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4">
+                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+                        <div>
+                            <p class="text-muted mb-1">Request #{{ object.id }}</p>
+                            <h2 class="mb-1">Room {{ object.room.number }}</h2>
+                            <p class="text-muted mb-0">Requested {{ object.request_date|date:"M d, Y" }}</p>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="status-pill status-{{ object.status }}">{% if is_guest_view %}{{ object.guest_visible_status }}{% else %}{{ object.get_status_display }}{% endif %}</span>
+                            {% if is_admin %}
+                                <a href="{% url 'maintenance_update' object.id %}" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-pencil me-1"></i>Update
+                                </a>
+                            {% elif is_maintenance_staff and object.assigned_to_id == staff_id %}
+                                <a href="{% url 'maintenance_update' object.id %}" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-pencil me-1"></i>Update
+                                </a>
+                            {% endif %}
+                            {% if is_admin %}
+                                <a href="{% url 'maintenance_delete' object.id %}" class="btn btn-outline-danger btn-sm">
+                                    <i class="bi bi-trash me-1"></i>Delete
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <div class="info-tile">
+                                <p class="label">Type</p>
+                                <p class="value">{{ object.get_type_display }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="info-tile">
+                                <p class="label">Requested By</p>
+                                <p class="value">{{ object.requested_by_name }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="info-tile">
+                                <p class="label">Assigned To</p>
+                                <p class="value">{{ object.assigned_to.name|default:"Unassigned" }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="info-tile">
+                                <p class="label">Guest</p>
+                                <p class="value">{{ object.guest.first_name|default:"Unknown" }} {{ object.guest.last_name|default:"" }}</p>
+                                {% if object.reservation %}
+                                    <p class="small text-muted mb-0">Stay: {{ object.reservation.check_in }} to {{ object.reservation.check_out }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-tile">
+                                <p class="label">Room Details</p>
+                                <p class="value">Floor {{ object.room.floor }} · {{ object.room.type }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="info-tile">
+                                <p class="label">Guest Comment</p>
+                                <p class="value">{{ object.comment|default:"No comment provided" }}</p>
+                            </div>
+                        </div>
+                        {% if not is_guest_view %}
+                        <div class="col-12">
+                            <div class="info-tile">
+                                <p class="label">Internal Notes</p>
+                                <p class="value">{{ object.internal_comment|default:"No notes yet" }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if not is_guest_view %}
+        <div class="col-12 col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0 d-flex align-items-center gap-2">
+                            <span>Timeline</span>
+                            <span id="maintenance-unread" class="badge bg-danger d-none"><i class="bi bi-bell-fill me-1"></i>New</span>
+                        </h5>
+                        {% if can_comment %}
+                            <span class="badge bg-secondary">Add updates below</span>
+                        {% endif %}
+                    </div>
+                    <div id="maintenance-timeline">
+                        <ul id="maintenance-comments" class="timeline list-unstyled mb-3 {% if not comments %}d-none{% endif %}">
+                            {% for note in comments %}
+                                <li class="timeline-item" data-comment-id="{{ note.id }}">
+                                    <div class="timeline-dot"></div>
+                                    <div class="timeline-content">
+                                        <div class="d-flex justify-content-between">
+                                            <strong>
+                                                {% if note.author %}
+                                                    {{ note.author.name }}
+                                                {% elif note.author_name %}
+                                                    {{ note.author_name }}
+                                                {% else %}
+                                                    Unknown
+                                                {% endif %}
+                                            </strong>
+                                            <span class="text-muted small">{{ note.created_at|date:"M d, Y H:i" }}</span>
+                                        </div>
+                                        <p class="mb-0">{{ note.note }}</p>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <p id="maintenance-comments-empty" class="text-muted mb-0 {% if comments %}d-none{% endif %}">No updates yet.</p>
+                    </div>
+
+                    {% if can_comment %}
+                        <hr class="my-3">
+                        <form method="post" class="comment-form" id="maintenance-comment-form">
+                            {% csrf_token %}
+                            {{ comment_form.as_p }}
+                            <button type="submit" class="btn btn-primary">Add Comment</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <div class="mt-4">
+        <a href="{% url 'maintenance_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to requests
+        </a>
+    </div>
+</main>
+
+{% endblock %}
+
+{% block extra_js %}
+    {% if not is_guest_view %}
+    <script>
+    (() => {
+        const commentsUrl = "{% url 'maintenance_comments_api' object.id %}";
+        const commentsList = document.getElementById('maintenance-comments');
+        const emptyState = document.getElementById('maintenance-comments-empty');
+        const commentForm = document.getElementById('maintenance-comment-form');
+        const noteField = commentForm?.querySelector('textarea[name="note"]');
+        const submitBtn = commentForm?.querySelector('button[type="submit"]');
+        const csrfToken = commentForm?.querySelector('[name="csrfmiddlewaretoken"]')?.value;
+
+        const escapeHtml = (value) => {
+            if (!value) return '';
+            return value.replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                            .replace(/>/g, '&gt;')
+                            .replace(/"/g, '&quot;')
+                            .replace(/'/g, '&#39;');
+        };
+
+            const seenIds = new Set(Array.from(document.querySelectorAll('[data-comment-id]')).map((el) => String(el.dataset.commentId)));
+            const unreadBadge = document.getElementById('maintenance-unread');
+            const timeline = document.getElementById('maintenance-timeline');
+
+            const markSeen = (comments) => {
+                comments.forEach((c) => seenIds.add(String(c.id)));
+                unreadBadge?.classList.add('d-none');
+            };
+
+            const playNotificationSound = () => {
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.value = 880;
+                    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.05, ctx.currentTime + 0.01);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.4);
+                    osc.connect(gain).connect(ctx.destination);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.5);
+                } catch (e) {
+                    // ignore audio errors (e.g., browser autoplay restrictions)
+                }
+            };
+
+            const handleInteraction = () => {
+                unreadBadge?.classList.add('d-none');
+                markSeen(Array.from(document.querySelectorAll('[data-comment-id]')).map((el) => ({ id: el.dataset.commentId })));
+            };
+            timeline?.addEventListener('click', handleInteraction);
+            timeline?.addEventListener('focusin', handleInteraction);
+
+        const renderComments = (comments) => {
+            if (!commentsList || !emptyState) return;
+            if (!comments.length) {
+                commentsList.innerHTML = '';
+                commentsList.classList.add('d-none');
+                emptyState.classList.remove('d-none');
+                return;
+            }
+
+            emptyState.classList.add('d-none');
+            commentsList.classList.remove('d-none');
+            commentsList.innerHTML = comments.map((comment) => `
+                <li class="timeline-item" data-comment-id="${escapeHtml(String(comment.id))}">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="d-flex justify-content-between">
+                            <strong>${escapeHtml(comment.author)}</strong>
+                            <span class="text-muted small">${escapeHtml(comment.created_at_display)}</span>
+                        </div>
+                        <p class="mb-0">${escapeHtml(comment.note)}</p>
+                    </div>
+                </li>
+            `).join('');
+        };
+
+        const fetchComments = () => {
+            fetch(commentsUrl, { headers: { 'Accept': 'application/json' } })
+                .then((response) => response.ok ? response.json() : Promise.reject())
+                .then((data) => {
+                    if (data && Array.isArray(data.comments)) {
+                        const newOnes = data.comments.filter((c) => !seenIds.has(String(c.id)));
+                        renderComments(data.comments);
+                        if (newOnes.length) {
+                            unreadBadge?.classList.remove('d-none');
+                            playNotificationSound();
+                        }
+                        markSeen(data.comments);
+                    }
+                })
+                .catch(() => {});
+        };
+
+        if (commentForm) {
+            commentForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                if (!csrfToken || !noteField) return;
+
+                const formData = new FormData(commentForm);
+                submitBtn?.setAttribute('disabled', 'disabled');
+
+                fetch(commentsUrl, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken, 'Accept': 'application/json' },
+                    body: formData,
+                })
+                    .then((response) => response.ok ? response.json() : response.json().then((data) => Promise.reject(data)))
+                    .then((data) => {
+                        if (data && data.comment) {
+                            noteField.value = '';
+                            fetchComments();
+                        }
+                    })
+                    .catch(() => {})
+                    .finally(() => submitBtn?.removeAttribute('disabled'));
+            });
+        }
+
+        fetchComments();
+        const poller = setInterval(fetchComments, 5000);
+        window.addEventListener('beforeunload', () => clearInterval(poller));
+    })();
+    </script>
+    {% endif %}
+{% endblock %}

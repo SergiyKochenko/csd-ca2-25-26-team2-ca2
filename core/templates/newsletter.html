@@ -1,0 +1,107 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscribe | Great Irish Hotels</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
+    <link rel="stylesheet" href="https://cdn-images.mailchimp.com/embedcode/classic-071822.css">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'newsletter.css' %}">
+</head>
+<body class="newsletter-page" style="padding-top: 72px;">
+    {% include "header.html" %}
+
+    <main class="newsletter-main py-5">
+        <div class="container py-4">
+            <div class="row g-4 align-items-center">
+                <div class="col-12 col-lg-5">
+                    <p class="footer-eyebrow mb-2">Stay in the loop</p>
+                    <h1 class="newsletter-heading mb-3">Subscribe for offers, new stays, and seasonal rewards.</h1>
+                    <p class="footer-text mb-0">Join our newsletter to receive curated travel inspiration and member-only perks from Great Irish Hotels.</p>
+                </div>
+                <div class="col-12 col-lg-7">
+                    <!-- Begin Mailchimp Signup Form -->
+                    <div id="mc_embed_signup" class="newsletter-card">
+                        <form action="https://ukr.us21.list-manage.com/subscribe/post?u=2129459ae31319aec431bd86e&amp;id=b4e310b12f&amp;f_id=00a8afe1f0"
+                              method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+                            <div id="mc_embed_signup_scroll">
+                                <div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-3 mb-3">
+                                    <h2 class="newsletter-title mb-0">Subscribe To Our Newsletter</h2>
+                                    <div class="indicates-required mb-0"><span class="asterisk">*</span> indicates required</div>
+                                </div>
+                                <div class="mc-field-group mb-3">
+                                    <label for="mce-EMAIL" class="form-label">Email Address <span class="asterisk">*</span></label>
+                                    <div class="newsletter-input-group">
+                                        <input type="email" value="" name="EMAIL" class="required email form-control" id="mce-EMAIL" required>
+                                        <button type="submit" name="subscribe" id="mc-embedded-subscribe" class="btn newsletter-submit">Subscribe</button>
+                                    </div>
+                                    <span id="mce-EMAIL-HELPERTEXT" class="helper_text"></span>
+                                </div>
+                                <div id="mce-responses" class="clear foot">
+                                    <div class="response" id="mce-error-response" style="display:none"></div>
+                                    <div class="response" id="mce-success-response" style="display:none"></div>
+                                </div>
+                                <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_2129459ae31319aec431bd86e_b4e310b12f" tabindex="-1" value=""></div>
+                            </div>
+                        </form>
+                        <hr class="footer-form-rule">
+                        <p class="footer-text small mb-3">Useful Links:</p>
+                        <div class="row g-3 align-items-center newsletter-logos">
+                            <div class="col-6 col-lg-3 text-center">
+                                <a href="https://www.iwa.ie/" target="_blank" rel="external nofollow noopener">
+                                    <img width="300" height="119" class="img-fluid" src="https://res.cloudinary.com/dvbhrs1gf/image/upload/v1683881801/IWA-logo-semi-white_p81vvw_bak328_osqc34.webp" alt="Irish Wheelchair Association">
+                                </a>
+                            </div>
+                            <div class="col-6 col-lg-3 text-center">
+                                <a href="https://www.hse.ie/eng/services/list/1/lho/corknorthlee/therapy/paediatric-occupational-therapy/sensory-processing.pdf" target="_blank" rel="external nofollow noopener">
+                                    <img width="75" height="56" class="img-fluid" src="https://res.cloudinary.com/dvbhrs1gf/image/upload/v1683881962/hse-site-logo-2021_trcouw_zw1frw.svg" alt="Health Service Executive">
+                                </a>
+                            </div>
+                            <div class="col-6 col-lg-3 text-center">
+                                <a href="https://autism.ie/" target="_blank" rel="external nofollow noopener">
+                                    <img width="260" height="61" class="img-fluid" src="https://res.cloudinary.com/dvbhrs1gf/image/upload/v1683882107/logo_autism_outline_fq5k00_bvouim.svg" alt="Autism Ireland">
+                                </a>
+                            </div>
+                            <div class="col-6 col-lg-3 text-center">
+                                <a href="https://adhdireland.ie/" target="_blank" rel="external nofollow noopener">
+                                    <img width="1500" height="750" class="img-fluid" src="https://res.cloudinary.com/dvbhrs1gf/image/upload/v1683882240/adhd-ireland-big-logo-1500x750_oinfmx_of6uok.png" alt="ADHD Ireland">
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <!--End mc_embed_signup-->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    {% include "footer.html" %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script id="mcjs">!function(c,h,i,m,p){m=c.createElement(h),p=c.getElementsByTagName(h)[0],m.async=1,m.src=i,p.parentNode.insertBefore(m,p)}(document,"script","https://chimpstatic.com/mcjs-connected/js/users/2129459ae31319aec431bd86e/2e89284d84e2785207d9d5344.js");</script>
+    <script src="https://s3.amazonaws.com/downloads.mailchimp.com/js/mc-validate.js"></script>
+    <script>
+        (function ($) {
+            window.fnames = new Array();
+            window.ftypes = new Array();
+            fnames[0] = 'EMAIL';
+            ftypes[0] = 'email';
+            fnames[1] = 'FNAME';
+            ftypes[1] = 'text';
+            fnames[2] = 'LNAME';
+            ftypes[2] = 'text';
+            fnames[3] = 'ADDRESS';
+            ftypes[3] = 'address';
+            fnames[4] = 'PHONE';
+            ftypes[4] = 'phone';
+            fnames[5] = 'BIRTHDAY';
+            ftypes[5] = 'birthday';
+        }(jQuery));
+        var $mcj = jQuery.noConflict(true);
+    </script>
+</body>
+</html>

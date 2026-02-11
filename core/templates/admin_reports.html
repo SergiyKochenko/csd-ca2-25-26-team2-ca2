@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - Great Irish Hotels</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+</head>
+<body>
+    {% include "header.html" %}
+    <main class="container-xl py-5 mt-5 admin-reports">
+        <section class="admin-hero p-4 p-lg-5 mb-5 rounded-4 position-relative overflow-hidden">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-8">
+                    <div class="d-inline-flex align-items-center gap-2 hero-pill mb-3">
+                        <i class="bi bi-graph-up-arrow"></i>
+                        <span>Performance Reports</span>
+                    </div>
+                    <h1 class="display-5 fw-bold text-white mb-3">Operations Reports</h1>
+                    <p class="text-white-75 lead mb-4">Generate real-time occupancy, reservation, and service insights by date range.</p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-light btn-lg hero-btn">
+                            <i class="bi bi-arrow-left"></i> Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="hero-metrics p-4 rounded-4 h-100">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <span class="text-white-75">Snapshot</span>
+                            <span class="badge bg-white text-dark">Reports</span>
+                        </div>
+                        <ul class="list-unstyled mb-0">
+                            <li class="d-flex gap-3 align-items-start mb-3">
+                                <span class="metric-dot bg-primary-subtle text-primary"><i class="bi bi-calendar-range"></i></span>
+                                <div>
+                                    <div class="fw-semibold text-white">Flexible range</div>
+                                    <small class="text-white-75">Pick any start/end dates to refresh.</small>
+                                </div>
+                            </li>
+                            <li class="d-flex gap-3 align-items-start mb-3">
+                                <span class="metric-dot bg-success-subtle text-success"><i class="bi bi-lightning-charge"></i></span>
+                                <div>
+                                    <div class="fw-semibold text-white">Real-time</div>
+                                    <small class="text-white-75">Data renders instantly on page.</small>
+                                </div>
+                            </li>
+                            <li class="d-flex gap-3 align-items-start">
+                                <span class="metric-dot bg-info-subtle text-info"><i class="bi bi-download"></i></span>
+                                <div>
+                                    <div class="fw-semibold text-white">CSV export</div>
+                                    <small class="text-white-75">Download exactly what you see.</small>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="report-card p-4 p-lg-5">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+                <div>
+                    <div class="d-inline-flex align-items-center gap-2 hero-pill mb-2">
+                        <i class="bi bi-filter"></i>
+                        <span>Filters</span>
+                    </div>
+                    <h2 class="h4 mb-1">Choose a date range</h2>
+                    <p class="text-muted small mb-0">Use the form below to refresh the live report. Export will match the current view.</p>
+                </div>
+                <span class="badge rounded-pill text-bg-dark">Live</span>
+            </div>
+
+            <form method="get" class="row g-3 align-items-end report-filter">
+                <div class="col-12 col-md-4 col-lg-3">
+                    <label class="form-label small fw-semibold text-muted">Start date</label>
+                    {{ report_form.start_date }}
+                </div>
+                <div class="col-12 col-md-4 col-lg-3">
+                    <label class="form-label small fw-semibold text-muted">End date</label>
+                    {{ report_form.end_date }}
+                </div>
+                <div class="col-12 col-md-4 col-lg-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-arrow-repeat"></i> Generate report
+                    </button>
+                </div>
+                <div class="col-12 col-lg-3 d-flex justify-content-lg-end gap-2">
+                    <a class="btn btn-outline-secondary w-100 w-lg-auto" href="?start_date={{ report_start|date:'Y-m-d' }}&end_date={{ report_end|date:'Y-m-d' }}&export=csv">
+                        <i class="bi bi-download"></i> Download CSV
+                    </a>
+                </div>
+                <div class="col-12">
+                    <div class="d-flex flex-wrap gap-4 align-items-center">
+                        <div class="form-check form-check-inline">
+                            {{ report_form.include_occupancy }}
+                            <label class="form-check-label ms-1">Occupancy</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            {{ report_form.include_reservations }}
+                            <label class="form-check-label ms-1">Reservations</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            {{ report_form.include_services }}
+                            <label class="form-check-label ms-1">Service requests</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            {{ report_form.include_housekeeping }}
+                            <label class="form-check-label ms-1">Housekeeping</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            {{ report_form.include_maintenance }}
+                            <label class="form-check-label ms-1">Maintenance</label>
+                        </div>
+                        <small class="text-muted">Select categories to include or toggle all.</small>
+                    </div>
+                </div>
+            </form>
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3 mb-4">
+                <span class="text-muted small">Range: {{ report_start|date:'M j, Y' }} — {{ report_end|date:'M j, Y' }}</span>
+                <span class="text-muted small">Refreshed {{ report_end|date:'M j, Y' }}</span>
+            </div>
+
+            <div class="report-summary-grid mb-4">
+                {% if include_occupancy %}
+                    <div class="report-metric">
+                        <div class="metric-label">Occupancy</div>
+                        <div class="metric-value text-primary">{{ report_data.occupancy_rate|default:0 }}%</div>
+                        <small class="text-muted">{{ report_data.booked_room_nights|default:0 }} / {{ report_data.total_room_nights|default:0 }} room-nights</small>
+                    </div>
+                {% endif %}
+
+                {% if include_reservations %}
+                    <div class="report-metric">
+                        <div class="metric-label">Reservations</div>
+                        <div class="metric-value text-success">{{ report_data.reservation_count|default:0 }}</div>
+                        <small class="text-muted">Confirmed, checked-in, and checked-out</small>
+                    </div>
+                {% endif %}
+
+                {% if include_services %}
+                    <div class="report-metric">
+                        <div class="metric-label">Service requests</div>
+                        <div class="metric-value text-warning">{{ report_data.service_request_count|default:0 }}</div>
+                        <small class="text-muted">{{ report_data.completed_service_count|default:0 }} completed</small>
+                    </div>
+                    <div class="report-metric">
+                        <div class="metric-label">Avg response</div>
+                        <div class="metric-value text-info">
+                            {% if report_data.avg_response_minutes %}
+
+                {% if include_housekeeping %}
+                    <div class="report-metric">
+                        <div class="metric-label">Housekeeping</div>
+                        <div class="metric-value text-primary">{{ report_data.housekeeping_count|default:0 }}</div>
+                        <small class="text-muted">Tasks scheduled within range</small>
+                    </div>
+                {% endif %}
+
+                {% if include_maintenance %}
+                    <div class="report-metric">
+                        <div class="metric-label">Maintenance</div>
+                        <div class="metric-value text-danger">{{ report_data.maintenance_count|default:0 }}</div>
+                        <small class="text-muted">Requests logged within range</small>
+                    </div>
+                {% endif %}
+                                {{ report_data.avg_response_minutes }}<span class="metric-suffix"> mins</span>
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </div>
+                        <small class="text-muted">Time from request to completion</small>
+                    </div>
+                {% endif %}
+
+                {% if include_housekeeping %}
+                    <div class="report-metric">
+                        <div class="metric-label">Housekeeping</div>
+                        <div class="metric-value text-primary">{{ report_data.housekeeping_count|default:0 }}</div>
+                        <small class="text-muted">Tasks scheduled within range</small>
+                    </div>
+                {% endif %}
+
+                {% if include_maintenance %}
+                    <div class="report-metric">
+                        <div class="metric-label">Maintenance</div>
+                        <div class="metric-value text-danger">{{ report_data.maintenance_count|default:0 }}</div>
+                        <small class="text-muted">Requests logged within range</small>
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if include_occupancy %}
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle report-table mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-muted">Date</th>
+                                <th class="text-muted text-center">Occupied rooms</th>
+                                <th class="text-muted text-end">Daily occupancy</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if report_data.daily_occupancy %}
+                                {% for row in report_data.daily_occupancy %}
+                                    <tr>
+                                        <td>{{ row.date|date:'M j, Y' }}</td>
+                                        <td class="text-center">{{ row.occupied_rooms }}</td>
+                                        <td class="text-end">{{ row.occupancy_rate }}%</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted">No data for the selected period.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+
+            {% if include_reservations %}
+                <div class="table-responsive mt-4">
+                    <table class="table table-sm align-middle report-table mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-muted">Guest</th>
+                                <th class="text-muted">Room</th>
+                                <th class="text-muted">Status</th>
+                                <th class="text-muted">Check-in</th>
+                                <th class="text-muted">Check-out</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if report_data.reservations %}
+                                {% for res in report_data.reservations %}
+                                    <tr>
+                                        <td>{{ res.guest }}</td>
+                                        <td>{{ res.room }}</td>
+                                        <td class="text-capitalize">{{ res.status }}</td>
+                                        <td>{{ res.check_in|date:'M j, Y' }}</td>
+                                        <td>{{ res.check_out|date:'M j, Y' }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">No reservations for the selected period.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+
+            {% if include_housekeeping %}
+                <div class="table-responsive mt-4">
+                    <table class="table table-sm align-middle report-table mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-muted">Date</th>
+                                <th class="text-muted">Room</th>
+                                <th class="text-muted">Staff</th>
+                                <th class="text-muted">Status</th>
+                                <th class="text-muted">Deep clean</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if report_data.housekeeping %}
+                                {% for hk in report_data.housekeeping %}
+                                    <tr>
+                                        <td>{{ hk.date|date:'M j, Y' }}</td>
+                                        <td>{{ hk.room }}</td>
+                                        <td>{{ hk.staff }}</td>
+                                        <td class="text-capitalize">{{ hk.status }}</td>
+                                        <td>{{ hk.deep_cleaning|yesno:'Yes,No' }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">No housekeeping tasks for the selected period.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+
+            {% if include_maintenance %}
+                <div class="table-responsive mt-4">
+                    <table class="table table-sm align-middle report-table mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-muted">Date</th>
+                                <th class="text-muted">Room</th>
+                                <th class="text-muted">Type</th>
+                                <th class="text-muted">Priority</th>
+                                <th class="text-muted">Status</th>
+                                <th class="text-muted">Assigned</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if report_data.maintenance %}
+                                {% for m in report_data.maintenance %}
+                                    <tr>
+                                        <td>{{ m.date_requested|date:'M j, Y' }}</td>
+                                        <td>{{ m.room }}</td>
+                                        <td class="text-capitalize">{{ m.type }}</td>
+                                        <td class="text-capitalize">{{ m.priority }}</td>
+                                        <td class="text-capitalize">{{ m.status }}</td>
+                                        <td>{{ m.assigned_to }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">No maintenance requests for the selected period.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </section>
+    </main>
+    {% include "footer.html" %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

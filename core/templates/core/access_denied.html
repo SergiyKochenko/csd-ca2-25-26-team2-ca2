@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Access Prohibited{% endblock %}
+
+{% block content %}
+{% include "header.html" %}
+
+<main class="container py-5">
+    <div class="card shadow-sm rounded-4 p-5 text-center">
+        <h1 class="mb-3">Access Prohibited</h1>
+        <p class="lead mb-4">{{ message|default:"You do not have permission to view this page." }}</p>
+        <a href="/" class="btn btn-primary btn-lg">Return to Home</a>
+    </div>
+</main>
+
+{% endblock %}

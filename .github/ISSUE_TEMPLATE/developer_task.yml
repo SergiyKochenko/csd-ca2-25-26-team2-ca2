@@ -1,0 +1,65 @@
+---
+name: "Developer Task"
+description: "Describe a development task or subtask for the project."
+title: "[DEV TASK] <short description>"
+labels: [developer task]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Developer Task
+        Please use the format below to describe your development task or subtask.
+  - type: input
+    id: task_title
+    attributes:
+      label: "Task Title"
+      description: "A concise title for the developer task."
+      placeholder: "Implement user authentication"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: "Task Description"
+      description: "Describe the task in detail."
+      placeholder: "Develop the backend logic for user login and registration."
+    validations:
+      required: true
+  - type: textarea
+    id: subtasks
+    attributes:
+      label: "Subtasks"
+      description: "List any subtasks or steps required to complete this task."
+      placeholder: |
+        - Create user model
+        - Implement login view
+        - Add registration form
+    validations:
+      required: false
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: "Acceptance Criteria"
+      description: "List the conditions that must be met for this task to be considered complete."
+      placeholder: |
+        - Users can register and log in
+        - Proper error handling is in place
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: "Dependencies"
+      description: "List any dependencies or blockers for this task."
+      placeholder: "Depends on database setup."
+    validations:
+      required: false
+  - type: textarea
+    id: additional
+    attributes:
+      label: "Additional Notes"
+      description: "Add any other context, attachments, or references."
+      placeholder: "Related issues, screenshots, or references."
+    validations:
+      required: false

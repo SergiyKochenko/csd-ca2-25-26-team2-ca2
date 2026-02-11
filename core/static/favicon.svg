@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Great Irish Hotels">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop stop-color="#0d6efd" offset="0%"/>
+      <stop stop-color="#6f42c1" offset="50%"/>
+      <stop stop-color="#f59f00" offset="100%"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#g)"/>
+  <path fill="#ffffff" d="M18 44h28c1.1 0 2-.9 2-2V24c0-1.1-.9-2-2-2h-6v-4c0-1.1-.9-2-2-2h-12c-1.1 0-2 .9-2 2v4h-6c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2Zm10-22h8v6h-8v-6Zm-8 6h6v6h-6v-6Zm0 8h6v6h-6v-6Zm8 0h8v6h-8v-6Zm10-2v-6h6v6h-6Zm0 8v-6h6v6h-6Z"/>
+</svg>

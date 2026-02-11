@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rooms - Great Irish Hotels</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+</head>
+<body class="rooms-body">
+        {% load custom_filters %}
+        {% include "header.html" %}
+        <main class="rooms-page container py-5">
+            <section class="rooms-hero shadow-sm rounded-4 p-4 p-lg-5 mb-5">
+                <div class="row g-4 align-items-center">
+                    <div class="col-lg-8">
+                        <p class="text-uppercase text-white-50 fw-semibold mb-2">Great Irish Hotels</p>
+                        <h1 class="display-6 text-white mb-3">Curated rooms crafted for every stay.</h1>
+                        <p class="text-white-75 mb-0">Browse availability, compare amenities, and, if you are part of the hotel team, update listings instantly.</p>
+                    </div>
+                    <div class="col-lg-4 d-grid gap-3">
+                        <div class="bg-white rounded-4 p-3 text-center shadow-sm">
+                            <p class="text-uppercase small text-muted mb-1">Currently Available</p>
+                            <p class="h2 mb-0 text-primary">{{ room_stats.available|default:0 }}</p>
+                        </div>
+                        {% if can_manage_rooms %}
+                        <a href="{% url 'add_room' %}" class="btn btn-light btn-lg rounded-pill fw-semibold">
+                            <i class="bi bi-plus-circle me-2"></i>Add Room
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </section>
+
+            <section class="rooms-stats row row-cols-1 row-cols-sm-3 g-3 mb-5">
+                <div class="col">
+                    <div class="room-stat-card h-100 rounded-4 p-4 border-0 shadow-sm">
+                        <p class="text-uppercase text-muted small mb-1">Total Rooms</p>
+                        <h3 class="mb-0">{{ room_stats.total|default:0 }}</h3>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="room-stat-card h-100 rounded-4 p-4 border-0 shadow-sm">
+                        <p class="text-uppercase text-muted small mb-1">Booked / Out</p>
+                        <h3 class="mb-0">{{ room_stats.booked|default:0 }}</h3>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="room-stat-card h-100 rounded-4 p-4 border-0 shadow-sm">
+                        <p class="text-uppercase text-muted small mb-1">Avg. Nightly Rate</p>
+                        <h3 class="mb-0">
+                            {% if room_stats.average_rate is not None %}
+                                €{{ room_stats.average_rate|floatformat:2 }}
+                            {% else %}
+                                --
+                            {% endif %}
+                        </h3>
+                    </div>
+                </div>
+            </section>
+
+            <section class="rooms-grid">
+            <div class="row g-4">
+                {% for room in rooms %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="room-card card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
+                        <div class="room-card-image position-relative">
+                            {% if room.image %}
+                            <img src="{{ room.image.url }}" class="card-img-top" alt="Room {{ room.number }}" style="height:230px; object-fit:cover;">
+                            {% else %}
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:230px; color:#bbb; font-size:1.1rem;">No Image</div>
+                            {% endif %}
+                            <span class="badge status-badge position-absolute bg-success">Available for Booking</span>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <p class="text-muted text-uppercase small mb-1">Room</p>
+                                    <h5 class="card-title mb-0">Room {{ room.number }}</h5>
+                                </div>
+                                <div class="text-end">
+                                    <p class="text-muted text-uppercase small mb-1">Nightly</p>
+                                    <span class="room-rate fw-semibold">€{{ room.rate|floatformat:2 }}</span>
+                                    {% if guest_points %}
+                                        <div class="small text-muted">Points: {{ guest_points }}</div>
+                                        {% if can_redeem_points %}
+                                            <div class="small text-success fw-semibold" style="font-size:0.75rem;">Redeem 35 points for 10% off</div>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <ul class="list-unstyled small text-muted mb-3 room-meta">
+                                <li><i class="bi bi-layers me-1 text-primary"></i>{{ room.type }} &middot; Floor {{ room.floor }}</li>
+                                <li><i class="bi bi-layout-three-columns me-1 text-primary"></i>{{ room.beds }} beds</li>
+                                <li><i class="bi bi-fire me-1 text-primary"></i>{% if room.smoking_allowed %}Smoking{% else %}Non-smoking{% endif %}</li>
+                            </ul>
+                            <div class="mt-auto">
+                            {% if guest_name %}
+                                <button class="btn btn-primary w-100 rounded-pill" data-bs-toggle="modal" data-bs-target="#bookingModal{{ room.id }}">
+                                    <i class="bi bi-calendar2-check me-1"></i>Book Now
+                                </button>
+                                <!-- Booking Modal (guest session) -->
+                                <div class="modal fade" id="bookingModal{{ room.id }}" tabindex="-1" aria-labelledby="bookingModalLabel{{ room.id }}" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <form method="post" action="/reservations/" class="booking-form" data-room-id="{{ room.id }}">
+                                                {% csrf_token %}
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="bookingModalLabel{{ room.id }}">Book Room {{ room.number }}</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <input type="hidden" name="room_id" value="{{ room.id }}">
+                                                    <div class="mb-3">
+                                                        <label for="checkin{{ room.id }}" class="form-label">Check-in Date</label>
+                                                        <input type="text" class="form-control guest-checkin date-input" id="checkin{{ room.id }}" name="check_in" required data-room-id="{{ room.id }}" placeholder="Select date">
+                                                        <div class="invalid-feedback" style="display:none;">Please select a check-in date</div>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="checkout{{ room.id }}" class="form-label">Check-out Date</label>
+                                                        <input type="text" class="form-control guest-checkout date-input" id="checkout{{ room.id }}" name="check_out" required data-room-id="{{ room.id }}" placeholder="Select date">
+                                                        <div class="invalid-feedback" style="display:none;">Please select a check-out date</div>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Guest</label>
+                                                        <input type="text" class="form-control" value="{{ guest_name }}" readonly>
+                                                    </div>
+                                                    <input type="hidden" name="id_document" value="{{ guest_id_document|default:'' }}">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Rate</label>
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control nightly-rate" value="€{{ room.rate|floatformat:2 }}" readonly data-room-id="{{ room.id }}" data-original-rate="{{ room.rate }}" data-discount-if-redeem="10">
+                                                            <span class="input-group-text">per night</span>
+                                                        </div>
+                                                        <div class="d-flex justify-content-between small text-muted mt-1">
+                                                            <span>Base rate shown.</span>
+                                                            <span>Points: {{ guest_points|default:0 }}</span>
+                                                        </div>
+                                                        <div class="form-check mt-2">
+                                                            <input class="form-check-input redeem-points-toggle" type="checkbox" value="true" id="redeemPoints{{ room.id }}" name="redeem_points" data-room-id="{{ room.id }}" data-discount-percent="10" {% if not can_redeem_points %}disabled{% else %}checked{% endif %}>
+                                                            <label class="form-check-label" for="redeemPoints{{ room.id }}">
+                                                                Redeem 35 points for 10% off
+                                                            </label>
+                                                        </div>
+                                                        <small class="{% if can_redeem_points %}text-success{% else %}text-muted{% endif %}" id="points-note{{ room.id }}" style="{% if not can_redeem_points %}display:block;{% else %}display:none;{% endif %}">
+                                                            {% if can_redeem_points %}
+                                                                Points redemption will apply a 10% discount and use 35 points.
+                                                            {% else %}
+                                                                Collect at least 35 points to redeem. Current: {{ guest_points|default:0 }}
+                                                            {% endif %}
+                                                        </small>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Total Price</label>
+                                                        <input type="text" class="form-control total-price" id="total-price{{ room.id }}" value="€0.00" readonly data-room-id="{{ room.id }}">
+                                                        <small class="text-muted" id="nights-info{{ room.id }}">Select dates to calculate</small>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Payment Method</label>
+                                                        <input type="text" class="form-control" value="Online" readonly>
+                                                        <input type="hidden" name="payment_method" value="online">
+                                                    </div>
+                                                    {% if room.booked_dates %}
+                                                    <div class="mb-3">
+                                                        <label class="form-label d-block mb-2"><i class="bi bi-calendar-x"></i> Unavailable Dates:</label>
+                                                        <div>
+                                                        {% for booking in room.booked_dates %}
+                                                            <span class="booked-dates-badge">
+                                                                <i class="bi bi-lock-fill"></i>{{ booking.check_in }} to {{ booking.check_out }}
+                                                            </span>
+                                                        {% endfor %}
+                                                        </div>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-primary booking-submit">Confirm Booking</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% elif staff_role == 'Reception' %}
+                                <button class="btn btn-success w-100 rounded-pill" data-bs-toggle="modal" data-bs-target="#receptionBookingModal{{ room.id }}">
+                                    <i class="bi bi-calendar2-plus me-1"></i>Book for Guest
+                                </button>
+                                <!-- Reception Booking Modal -->
+                                <div class="modal fade" id="receptionBookingModal{{ room.id }}" tabindex="-1" aria-labelledby="receptionBookingLabel{{ room.id }}" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <form method="post" action="{% url 'reservation_create' %}">
+                                                {% csrf_token %}
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="receptionBookingLabel{{ room.id }}">Book Room {{ room.number }} for Guest</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <input type="hidden" name="room" value="{{ room.id }}">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Guest</label>
+                                                        <select name="guest" class="form-select reception-guest-select" required data-room-id="{{ room.id }}">
+                                                            <option value="">Select guest...</option>
+                                                            {% for g in guests %}
+                                                                <option value="{{ g.id }}">{{ g.first_name }} {{ g.last_name }} — {{ g.email }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                        <div class="small mt-1"><a href="{% url 'guest_create' %}">Create new guest</a></div>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="checkin_r{{ room.id }}" class="form-label">Check-in Date</label>
+                                                        <input type="text" class="form-control reception-checkin" id="checkin_r{{ room.id }}" name="check_in" required data-room-id="{{ room.id }}" placeholder="Select date">
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="checkout_r{{ room.id }}" class="form-label">Check-out Date</label>
+                                                        <input type="text" class="form-control reception-checkout" id="checkout_r{{ room.id }}" name="check_out" required data-room-id="{{ room.id }}" placeholder="Select date">
+                                                    </div>
+                                                    <input type="hidden" name="status" value="confirmed">
+                                                    {% if room.booked_dates %}
+                                                    <div class="alert alert-info small">
+                                                        <strong>Booked dates for this room:</strong>
+                                                        {% for booking in room.booked_dates %}
+                                                            {{ booking.check_in }} to {{ booking.check_out }}{% if not forloop.last %}<br>{% endif %}
+                                                        {% endfor %}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-success reception-booking-submit">Create Reservation</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                {% if request.user.is_authenticated or staff_role %}
+                                    <a class="btn btn-outline-secondary w-100 rounded-pill login-to-book-btn" href="/login/?next=/rooms/" data-requires-logout="true">
+                                        Login to Book
+                                    </a>
+                                {% else %}
+                                    <a class="btn btn-outline-secondary w-100 rounded-pill login-to-book-btn" href="/login/?next=/rooms/" data-requires-logout="false">
+                                        Login to Book
+                                    </a>
+                                {% endif %}
+                            {% endif %}
+                            {% if can_manage_rooms %}
+                            <div class="room-admin-actions d-flex flex-column flex-sm-row gap-2 mt-3">
+                                <a href="{% url 'room_edit' room.id %}" class="btn btn-outline-dark flex-fill">
+                                    <i class="bi bi-pencil-square me-1"></i>Edit
+                                </a>
+                                <a href="{% url 'room_delete' room.id %}" class="btn btn-outline-danger flex-fill">
+                                    <i class="bi bi-trash me-1"></i>Delete
+                                </a>
+                            </div>
+                            {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center">
+                    <div class="alert alert-light border rounded-4 py-5">No rooms found.</div>
+                </div>
+                {% endfor %}
+            </div>
+            </section>
+        </main>
+        <!-- Logout-and-login prompt for staff/admin trying to book -->
+        <div class="modal fade" id="loginToBookModal" tabindex="-1" aria-labelledby="loginToBookModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content shadow">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="loginToBookModalLabel"><i class="bi bi-shield-lock me-2"></i>Switch to Guest Login</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-2">You are currently logged in with a staff or admin session.</p>
+                        <p class="mb-0 fw-semibold">Log out and continue to guest login to book this room?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="loginToBookConfirm"><i class="bi bi-box-arrow-right me-1"></i>Logout &amp; Continue</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Error Modal -->
+        <div class="modal fade" id="bookingErrorModal" tabindex="-1" aria-labelledby="bookingErrorLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content shadow-lg border-0">
+                    <div class="modal-header bg-danger text-white border-0">
+                        <h5 class="modal-title" id="bookingErrorLabel"><i class="bi bi-exclamation-circle me-2"></i>Booking Not Available</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body py-4">
+                        <p id="bookingErrorMessage" class="mb-0 text-dark fw-semibold"></p>
+                    </div>
+                    <div class="modal-footer border-0 bg-light">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle me-1"></i>Try Another Date
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% include "footer.html" %}
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        // Intercept booking form submit to redirect to payment if needed
+        document.querySelectorAll('.booking-form').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                var paymentMethod = form.querySelector('[name="payment_method"]').value;
+                const checkInInput = form.querySelector('[name="check_in"]');
+                const checkOutInput = form.querySelector('[name="check_out"]');
+                const checkIn = checkInInput.value;
+                const checkOut = checkOutInput.value;
+                
+                let hasErrors = false;
+                
+                // Reset previous error states
+                form.querySelectorAll('.form-control').forEach(function(input) {
+                    input.classList.remove('is-invalid');
+                    const errorMsg = input.parentElement.querySelector('.invalid-feedback');
+                    if (errorMsg) {
+                        errorMsg.style.display = 'none';
+                    }
+                });
+                
+                // Validate check-in date
+                if (!checkIn) {
+                    e.preventDefault();
+                    checkInInput.classList.add('is-invalid');
+                    const checkInError = checkInInput.parentElement.querySelector('.invalid-feedback');
+                    if (checkInError) {
+                        checkInError.style.display = 'block';
+                    }
+                    hasErrors = true;
+                }
+                
+                // Validate check-out date
+                if (!checkOut) {
+                    e.preventDefault();
+                    checkOutInput.classList.add('is-invalid');
+                    const checkOutError = checkOutInput.parentElement.querySelector('.invalid-feedback');
+                    if (checkOutError) {
+                        checkOutError.style.display = 'block';
+                    }
+                    hasErrors = true;
+                }
+                
+                // If there are validation errors, don't proceed
+                if (hasErrors) {
+                    return;
+                }
+                
+                if (paymentMethod === 'online') {
+                    // Instead of submitting to /reservations/, submit to /start-payment/ with AJAX for validation
+                    e.preventDefault();
+                    
+                    // Disable submit button
+                    var submitBtn = form.querySelector('.booking-submit');
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.textContent = 'Processing...';
+                    }
+                    
+                    // Create FormData from the form
+                    var formData = new FormData(form);
+                    
+                    // Send AJAX request to start_payment for validation
+                    fetch('/start-payment/', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        credentials: 'same-origin'
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            // Success - now submit the form normally to render payment page
+                            var tempForm = document.createElement('form');
+                            tempForm.method = 'POST';
+                            tempForm.action = '/start-payment/';
+                            // Copy all fields
+                            Array.from(form.elements).forEach(function(el) {
+                                if (el.name && (el.type !== 'submit' && el.type !== 'button')) {
+                                    var input = document.createElement('input');
+                                    input.type = 'hidden';
+                                    input.name = el.name;
+                                    input.value = el.value;
+                                    tempForm.appendChild(input);
+                                }
+                            });
+                            // Add CSRF token
+                            var csrf = form.querySelector('input[name="csrfmiddlewaretoken"]');
+                            if (csrf) {
+                                var csrfInput = document.createElement('input');
+                                csrfInput.type = 'hidden';
+                                csrfInput.name = 'csrfmiddlewaretoken';
+                                csrfInput.value = csrf.value;
+                                tempForm.appendChild(csrfInput);
+                            }
+                            document.body.appendChild(tempForm);
+                            tempForm.submit();
+                        } else if (response.status === 400) {
+                            return response.json().then(data => {
+                                throw new Error(data.error || 'An error occurred');
+                            });
+                        } else {
+                            throw new Error('Payment processing failed');
+                        }
+                    })
+                    .catch(error => {
+                        // Error - show error message in dedicated error modal
+                        var errorMessageEl = document.getElementById('bookingErrorMessage');
+                        if (errorMessageEl) {
+                            errorMessageEl.textContent = error.message;
+                        }
+                        var errorModal = new bootstrap.Modal(document.getElementById('bookingErrorModal'));
+                        errorModal.show();
+                        
+                        // Re-enable submit button
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = 'Confirm Booking';
+                        }
+                    });
+                }
+            });
+        });
+
+        // Initialize Flatpickr date pickers with disabled dates
+        // Store booked dates per room from the template data
+        const roomBookedDatesRaw = `{
+            {% for room in rooms %}
+                "{{ room.id }}": [
+                    {% for booking in room.booked_dates %}
+                    {
+                        "check_in": "{{ booking.check_in }}",
+                        "check_out": "{{ booking.check_out }}"
+                    }{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ]{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        }`;
+        
+        const roomBookedDates = JSON.parse(roomBookedDatesRaw);
+
+        // Helper: Get all disabled dates for a room (as date strings to avoid timezone issues)
+        function getDisabledDatesForRoom(roomId) {
+            const bookings = roomBookedDates[roomId] || [];
+            const disabledDates = [];
+            
+            bookings.forEach(booking => {
+                // Parse date strings directly without creating Date objects (avoids timezone issues)
+                const [checkInYear, checkInMonth, checkInDay] = booking.check_in.split('-').map(Number);
+                const [checkOutYear, checkOutMonth, checkOutDay] = booking.check_out.split('-').map(Number);
+                
+                const startDate = new Date(checkInYear, checkInMonth - 1, checkInDay);
+                const endDate = new Date(checkOutYear, checkOutMonth - 1, checkOutDay);
+                const currentDate = new Date(startDate);
+                
+                // Add all dates from check_in to check_out (excluding check_out itself for next availability)
+                while (currentDate < endDate) {
+                    // Push as YYYY-MM-DD string format which is what Flatpickr prefers
+                    const year = currentDate.getFullYear();
+                    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+                    const day = String(currentDate.getDate()).padStart(2, '0');
+                    disabledDates.push(`${year}-${month}-${day}`);
+                    
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+            });
+            
+            return disabledDates;
+        }
+
+        // Function to check if date range is available
+        function isDateRangeAvailable(roomId, checkInStr, checkOutStr) {
+            const bookings = roomBookedDates[roomId] || [];
+            const ciDate = new Date(checkInStr);
+            const coDate = new Date(checkOutStr);
+            
+            for (let booking of bookings) {
+                const ciBooking = new Date(booking.check_in);
+                const coBooking = new Date(booking.check_out);
+                // Check for overlap: check_in < booking.check_out AND check_out > booking.check_in
+                if (ciDate < coBooking && coDate > ciBooking) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // Initialize guest booking date pickers with Flatpickr
+        document.querySelectorAll('.guest-checkin').forEach(function(input) {
+            const roomId = input.dataset.roomId;
+            const disabledDates = getDisabledDatesForRoom(roomId);
+            
+            flatpickr(input, {
+                dateFormat: 'Y-m-d',
+                minDate: 'today',
+                disable: disabledDates,
+                onChange: function(selectedDates) {
+                    if (selectedDates.length > 0) {
+                        const checkOutInput = document.querySelector('.guest-checkout[data-room-id="' + roomId + '"]');
+                        if (checkOutInput && checkOutInput.flatpickr) {
+                            // Set minDate for checkout to be after check-in
+                            const nextDay = new Date(selectedDates[0]);
+                            nextDay.setDate(nextDay.getDate() + 1);
+                            checkOutInput.flatpickr.set('minDate', nextDay);
+                        }
+                    }
+                    // Calculate total price when check-in changes
+                    calculateTotalPrice(roomId);
+                }
+            });
+
+            // Auto-calc on load so defaults (including auto-checked redeem) are reflected
+            calculateTotalPrice(roomId);
+        });
+
+        // Function to calculate total price based on selected dates
+        function calculateTotalPrice(roomId) {
+            const checkInInput = document.querySelector('.guest-checkin[data-room-id="' + roomId + '"]');
+            const checkOutInput = document.querySelector('.guest-checkout[data-room-id="' + roomId + '"]');
+            const totalPriceField = document.querySelector('.total-price[data-room-id="' + roomId + '"]');
+            const nightsInfoField = document.getElementById('nights-info' + roomId);
+            const nightlyRateField = document.querySelector('.nightly-rate[data-room-id="' + roomId + '"]');
+            const redeemToggle = document.querySelector('.redeem-points-toggle[data-room-id="' + roomId + '"]');
+            const pointsNote = document.getElementById('points-note' + roomId);
+            
+            if (!checkInInput || !checkOutInput || !totalPriceField || !nightlyRateField) {
+                return;
+            }
+            
+            const checkIn = checkInInput.value;
+            const checkOut = checkOutInput.value;
+            
+            if (!checkIn || !checkOut) {
+                totalPriceField.value = '€0.00';
+                if (nightsInfoField) {
+                    nightsInfoField.textContent = 'Select dates to calculate';
+                }
+                return;
+            }
+            
+            // Parse the dates
+            const checkInDate = new Date(checkIn);
+            const checkOutDate = new Date(checkOut);
+            
+            // Calculate number of nights
+            const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+            
+            if (nights <= 0) {
+                totalPriceField.value = '€0.00';
+                if (nightsInfoField) {
+                    nightsInfoField.textContent = 'Invalid date range';
+                }
+                return;
+            }
+            
+            // Get the nightly rate from the hidden data attributes
+            const originalRate = parseFloat(nightlyRateField.dataset.originalRate);
+            const redeemDiscount = parseInt(nightlyRateField.dataset.discountIfRedeem || nightlyRateField.dataset.discount || '0');
+            const discount = (redeemToggle && redeemToggle.checked) ? redeemDiscount : 0;
+            
+            // Calculate discounted rate if applicable
+            const discountedRate = originalRate * (1 - discount / 100);
+            
+            // Calculate total price
+            const totalPrice = discountedRate * nights;
+            
+            // Update the total price field
+            totalPriceField.value = '€' + totalPrice.toFixed(2);
+			// Update nightly rate shown when toggling redeem option
+			nightlyRateField.value = '€' + (discount > 0 ? discountedRate : originalRate).toFixed(2);
+            
+            // Update the nights info
+            if (nightsInfoField) {
+                let info = nights + ' night' + (nights !== 1 ? 's' : '') + ' @ €' + discountedRate.toFixed(2) + '/night';
+                if (discount > 0) {
+                    info += ' (points redemption)';
+                }
+                nightsInfoField.textContent = info;
+            }
+
+			if (pointsNote) {
+				if (discount > 0) {
+					pointsNote.style.display = 'block';
+					pointsNote.classList.remove('text-muted');
+					pointsNote.classList.add('text-success');
+					pointsNote.textContent = '10% discount applied. 35 points will be used on checkout.';
+				} else if (!pointsNote.classList.contains('text-muted')) {
+					pointsNote.style.display = pointsNote.textContent ? 'block' : 'none';
+				}
+            }
+        }
+
+        document.querySelectorAll('.guest-checkout').forEach(function(input) {
+            const roomId = input.dataset.roomId;
+            const disabledDates = getDisabledDatesForRoom(roomId);
+            
+            flatpickr(input, {
+                dateFormat: 'Y-m-d',
+                minDate: 'today',
+                disable: disabledDates,
+                onChange: function(selectedDates) {
+                    // Calculate total price when check-out changes
+                    calculateTotalPrice(roomId);
+                }
+            });
+        });
+
+        // Recalculate totals when toggling points redemption
+        document.querySelectorAll('.redeem-points-toggle').forEach(function(toggle) {
+            toggle.addEventListener('change', function() {
+                calculateTotalPrice(this.dataset.roomId);
+            });
+        });
+
+        // Handle "Login to Book" for staff/admin: show Bootstrap modal, logout, then redirect to guest login
+        (function() {
+            const modalEl = document.getElementById('loginToBookModal');
+            if (!modalEl) return;
+            const modal = new bootstrap.Modal(modalEl);
+            const confirmBtn = document.getElementById('loginToBookConfirm');
+            let pendingRedirect = '/login/?next=/rooms/';
+            document.querySelectorAll('.login-to-book-btn').forEach(function(btn) {
+                const requiresLogout = btn.dataset.requiresLogout === 'true';
+                if (!requiresLogout) return;
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    pendingRedirect = btn.getAttribute('href') || '/login/?next=/rooms/';
+                    modal.show();
+                });
+            });
+
+            if (confirmBtn) {
+                confirmBtn.addEventListener('click', function () {
+                    confirmBtn.disabled = true;
+                    confirmBtn.textContent = 'Logging out...';
+                    fetch('/logout/', { method: 'GET', credentials: 'same-origin' })
+                        .finally(() => {
+                            window.location.href = pendingRedirect;
+                        });
+                });
+            }
+        })();
+
+        // Initialize reception booking date pickers with Flatpickr
+        document.querySelectorAll('.reception-checkin').forEach(function(input) {
+            const roomId = input.dataset.roomId;
+            const disabledDates = getDisabledDatesForRoom(roomId);
+            
+            flatpickr(input, {
+                dateFormat: 'Y-m-d',
+                minDate: 'today',
+                disable: disabledDates,
+                onChange: function(selectedDates) {
+                    if (selectedDates.length > 0) {
+                        const checkOutInput = document.querySelector('.reception-checkout[data-room-id="' + roomId + '"]');
+                        if (checkOutInput && checkOutInput.flatpickr) {
+                            // Set minDate for checkout to be after check-in
+                            const nextDay = new Date(selectedDates[0]);
+                            nextDay.setDate(nextDay.getDate() + 1);
+                            checkOutInput.flatpickr.set('minDate', nextDay);
+                        }
+                    }
+                }
+            });
+        });
+
+        document.querySelectorAll('.reception-checkout').forEach(function(input) {
+            const roomId = input.dataset.roomId;
+            const disabledDates = getDisabledDatesForRoom(roomId);
+            
+            flatpickr(input, {
+                dateFormat: 'Y-m-d',
+                minDate: 'today',
+                disable: disabledDates
+            });
+        });
+
+        // Prevent submission if there are validation errors on form submission
+        document.querySelectorAll('form[action="/reservations/"]').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                // Validation is already handled in the main .booking-form submit handler above
+                // This is just a backup for non-online payment methods
+                const checkInInput = form.querySelector('[name="check_in"]');
+                const checkOutInput = form.querySelector('[name="check_out"]');
+                const checkIn = checkInInput.value;
+                const checkOut = checkOutInput.value;
+                
+                if (!checkIn || !checkOut) {
+                    e.preventDefault();
+                    if (!checkIn) {
+                        checkInInput.classList.add('is-invalid');
+                        const errorMsg = checkInInput.parentElement.querySelector('.invalid-feedback');
+                        if (errorMsg) {
+                            errorMsg.style.display = 'block';
+                        }
+                    }
+                    if (!checkOut) {
+                        checkOutInput.classList.add('is-invalid');
+                        const errorMsg = checkOutInput.parentElement.querySelector('.invalid-feedback');
+                        if (errorMsg) {
+                            errorMsg.style.display = 'block';
+                        }
+                    }
+                }
+            });
+        });
+
+        document.querySelectorAll('form[action="{% url "reservation_create" %}"]').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                const checkIn = form.querySelector('[name="check_in"]').value;
+                const checkOut = form.querySelector('[name="check_out"]').value;
+                const guest = form.querySelector('[name="guest"]').value;
+                
+                if (!checkIn || !checkOut) {
+                    e.preventDefault();
+                    alert('Please select both check-in and check-out dates');
+                    return;
+                }
+                
+                if (!guest) {
+                    e.preventDefault();
+                    alert('Please select a guest');
+                    return;
+                }
+            });
+        });
+        }); // End DOMContentLoaded
+        </script>
+</body>
+</html>

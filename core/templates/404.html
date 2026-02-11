@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}404 Not Found | Great Irish Hotels{% endblock %}
+{% block body_class %}bg-light{% endblock %}
+{% block content %}
+{% include "header.html" %}
+<main class="container py-5" style="padding-top: 6rem;">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+                <div class="card-body p-5 text-center">
+                    <div class="mb-3 text-primary">
+                        <i class="bi bi-compass" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <p class="text-uppercase text-muted small fw-semibold mb-1">Error 404</p>
+                    <h1 class="display-6 mb-3">We can't find the page you're looking for.</h1>
+                    <p class="lead text-muted mb-4">The page might have moved, been removed, or you may have mistyped the address. Let's get you back to a place that works.</p>
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a class="btn btn-primary btn-lg rounded-pill" href="{% url 'home' %}"><i class="bi bi-house-door me-2"></i>Back to Home</a>
+                        <a class="btn btn-outline-primary btn-lg rounded-pill" href="{% url 'rooms' %}"><i class="bi bi-door-open me-2"></i>View Rooms</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

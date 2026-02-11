@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Great Irish Hotels - Home</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="with-fixed-header home-page">
+
+{% include "header.html" %}
+
+
+
+
+<div class="container">
+    <!-- Hero Section -->
+    <div class="position-relative rounded-4 overflow-hidden mt-4" style="background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80') center center/cover no-repeat; min-height: 340px;">
+        <div class="position-absolute top-0 start-0 w-100 h-100" style="background: rgba(0,0,0,0.35);"></div>
+        <div class="position-relative text-center text-white py-5 px-3" style="z-index:2;">
+            <h1 class="display-5 fw-bold mb-3">Great Irish Hotels</h1>
+            <p class="lead mb-4">Experience Ireland's Warmest Welcome</p>
+            <a href="#info" class="btn btn-light btn-lg rounded-pill">Learn More</a>
+        </div>
+    </div>
+
+    <!-- Info Section -->
+    <div id="info" class="bg-secondary text-white rounded-4 my-4 py-5 px-3 text-center">
+        <h2 class="h4 mb-3">Welcome to Great Irish Hotels</h2>
+        <p class="mb-2">
+            Experience the very best of Ireland with Great Irish Hotels. Our award-winning collection provides a warm, welcoming retreat in every region, from the Wild Atlantic Way to the heart of Ireland. Whether you desire luxury, tradition, or adventure, our family-run hotels offer the perfect base to discover Ireland’s charm, vibrant culture, and breathtaking natural beauty.
+        </p>
+        <div class="collapse" id="infoMoreText">
+            <p class="mb-2">
+                Each of our hotels is steeped in local heritage and offers a unique blend of modern comfort and traditional Irish hospitality. Enjoy gourmet dining experiences crafted from the freshest local ingredients, unwind in luxurious rooms with stunning views, and take part in exclusive activities that celebrate the spirit of Ireland. Our dedicated staff are passionate about making your stay memorable, whether you’re planning a romantic getaway, a family adventure, or a business retreat. With Great Irish Hotels, you’ll find not just a place to stay, but a place to belong—where every guest is welcomed as part of our extended family. Start your journey with us and create unforgettable memories in the heart of Ireland.
+            </p>
+        </div>
+        <a class="btn btn-outline-light rounded-pill mt-2" data-bs-toggle="collapse" href="#infoMoreText" role="button" aria-expanded="false" aria-controls="infoMoreText" id="readMoreBtn">Read More</a>
+    </div>
+
+    <!-- Features Grid -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 rounded-4 shadow-sm text-center">
+                <img src="https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=400&q=80" class="card-img-top rounded-top-4" style="height:220px; object-fit:cover;" alt="Rooms">
+                <div class="card-body">
+                    <h5 class="card-title text-secondary fw-semibold">Rooms</h5>
+                    <p class="card-text text-muted">Reassurance in Relaxation</p>
+                    <a href="/rooms/" class="btn btn-secondary rounded-pill">Read More</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 rounded-4 shadow-sm text-center">
+                <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80" class="card-img-top rounded-top-4" style="height:220px; object-fit:cover;" alt="Dining" />
+                <div class="card-body">
+                    <h5 class="card-title text-secondary fw-semibold">Dining</h5>
+                    <p class="card-text text-muted">A Sense Of Pride, A Pride Of Place</p>
+                    <a href="/menu/" class="btn btn-secondary rounded-pill">Read More</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 rounded-4 shadow-sm text-center">
+                <img src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80" class="card-img-top rounded-top-4" style="height:220px; object-fit:cover;" alt="Events">
+                <div class="card-body">
+                    <h5 class="card-title text-secondary fw-semibold">Events</h5>
+                    <p class="card-text text-muted">Endless Possibilities, Countless Memories...</p>
+                    <a href="#" class="btn btn-secondary rounded-pill">Read More</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 rounded-4 shadow-sm text-center">
+                <img src="https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80" class="card-img-top rounded-top-4" style="height:220px; object-fit:cover;" alt="Offers">
+                <div class="card-body">
+                    <h5 class="card-title text-secondary fw-semibold">Offers</h5>
+                    <p class="card-text text-muted">Warmth Of Heart At The Heart Of The Experience!</p>
+                    <a href="#" class="btn btn-secondary rounded-pill">Read More</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include "footer.html" %}
+
+    <!-- Bootstrap JS Bundle (with Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var readMoreBtn = document.getElementById('readMoreBtn');
+            var infoMoreText = document.getElementById('infoMoreText');
+            var collapse = new bootstrap.Collapse(infoMoreText, { toggle: false });
+
+            infoMoreText.addEventListener('show.bs.collapse', function () {
+                readMoreBtn.textContent = 'Read Less';
+            });
+            infoMoreText.addEventListener('hide.bs.collapse', function () {
+                readMoreBtn.textContent = 'Read More';
+            });
+        });
+    </script>
+    </body>
+    </html>

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Confirm Delete - Hotel Management{% endblock %}
+
+{% block content %}
+{% include "header.html" %}
+
+<main class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-5">
+            <div class="card border-danger shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <h3 class="card-title text-danger mb-3">
+                        <i class="bi bi-exclamation-triangle"></i> Confirm Delete
+                    </h3>
+                    
+                    <p class="mb-4">
+                        Are you sure you want to delete this item? This action cannot be undone.
+                    </p>
+
+                    <div class="alert alert-light border">
+                        {% if object.first_name %}
+                            <strong>{{ object.first_name }} {{ object.last_name }}</strong>
+                        {% elif object.number %}
+                            <strong>Room {{ object.number }}</strong>
+                        {% elif object.room %}
+                            <strong>Room {{ object.room.number }}</strong>
+                        {% elif object.request_type %}
+                            <strong>{{ object.request_type }}</strong>
+                        {% else %}
+                            <strong>Item #{{ object.id }}</strong>
+                        {% endif %}
+                    </div>
+
+                    <form method="post" class="d-flex gap-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger flex-grow-1">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                        <a href="javascript:history.back()" class="btn btn-secondary flex-grow-1">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+{% endblock %}

@@ -1,0 +1,358 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile | Great Irish Hotels{% endblock %}
+
+{% block content %}
+    {% include "header.html" %}
+
+    <main class="flex-grow-1 pt-5 mt-5 profile-page">
+        <div class="container py-5">
+            <div class="row">
+                <div class="col-12 col-lg-8 mx-auto">
+                    <!-- Profile Header -->
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h2 class="mb-0">
+                                <i class="bi bi-person-circle"></i> My Profile
+                            </h2>
+                        </div>
+                        <div class="card-body">
+                            <!-- Guest Profile Info -->
+                            {% if user_type == 'guest' %}
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <p class="mb-2">
+                                            <strong>Name:</strong> {{ user_obj.first_name }} {{ user_obj.last_name }}
+                                        </p>
+                                        <p class="mb-2">
+                                            <strong>Email:</strong> {{ user_obj.email }}
+                                        </p>
+                                        <p class="mb-2">
+                                            <strong>Phone:</strong> {{ user_obj.phone }}
+                                        </p>
+                                        {% if guest_id_display %}
+                                        <p class="mb-0">
+                                            <strong>Guest ID:</strong> {{ guest_id_display }}
+                                        </p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card bg-light border-primary">
+                                            <div class="card-body">
+                                                <p class="mb-2">
+                                                    <strong>Points Balance:</strong>
+                                                    <span class="fs-5 fw-semibold text-primary">{{ points_balance|default:0 }}</span>
+                                                </p>
+                                                <p class="mb-0">
+                                                    {% if can_redeem_points %}
+                                                        <span class="badge bg-success"><i class="bi bi-stars"></i> You can redeem 35 points for 10% off your next booking.</span>
+                                                    {% else %}
+                                                        <span class="text-muted">Earn {{ points_needed|default:35 }} more points to redeem a 10% discount.</span>
+                                                    {% endif %}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Reservation Statistics -->
+                                <div class="row mt-4">
+                                    <div class="col-12">
+                                        <h5 class="mb-3"><i class="bi bi-calendar-check"></i> Your Stay Statistics</h5>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card bg-info bg-opacity-10 border-info">
+                                            <div class="card-body text-center">
+                                                <p class="text-muted small mb-1">Total Reservations</p>
+                                                <h4 class="mb-0 text-info">{{ total_reservations }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card bg-success bg-opacity-10 border-success">
+                                            <div class="card-body text-center">
+                                                <p class="text-muted small mb-1">Completed Stays</p>
+                                                <h4 class="mb-0 text-success">{{ completed_reservations }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-4">
+                                    <div class="col-12">
+                                        <div class="card border-0 bg-light">
+                                            <div class="card-body d-flex align-items-center justify-content-between">
+                                                <div>
+                                                    <h5 class="mb-1"><i class="bi bi-stars"></i> Points Program</h5>
+                                                    <p class="mb-0 text-muted">Earn <strong>5 points</strong> for each completed stay. Redeem <strong>35 points</strong> for <strong>10% off</strong> your next booking.</p>
+                                                </div>
+                                                <span class="badge bg-primary">{{ points_balance|default:0 }} pts</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            <!-- Staff Profile Info -->
+                            {% if user_type == 'staff' %}
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <p class="mb-2">
+                                            <strong>Name:</strong> {{ user_obj.name }}
+                                        </p>
+                                        <p class="mb-2">
+                                            <strong>Email:</strong> {{ user_obj.email }}
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-2">
+                                            <strong>Role:</strong> 
+                                            <span class="badge bg-info">{{ user_obj.role }}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            <!-- Admin Profile Info -->
+                            {% if user_type == 'admin' %}
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <p class="mb-2">
+                                            <strong>Username:</strong> {{ user_obj.username }}
+                                        </p>
+                                        <p class="mb-2">
+                                            <strong>Email:</strong> {{ user_obj.email }}
+                                        </p>
+                                        {% if user_obj.first_name or user_obj.last_name %}
+                                            <p class="mb-2">
+                                                <strong>Full Name:</strong> {{ user_obj.first_name }} {{ user_obj.last_name }}
+                                            </p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-2">
+                                            <strong>Account Type:</strong> 
+                                            <span class="badge bg-danger">Administrator</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if user_type == 'guest' %}
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0">
+                                <i class="bi bi-calendar-check"></i> My Reservations
+                            </h4>
+                            <span class="badge bg-secondary">Guest only</span>
+                        </div>
+                        <div class="card-body">
+                            {% if guest_reservations %}
+                                <div class="list-group list-group-flush">
+                                    {% for res in guest_reservations %}
+                                        <div class="list-group-item px-0">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <div class="fw-semibold">Room {{ res.room.number }} &middot; {{ res.room.type }}</div>
+                                                    <div class="text-muted small">
+                                                        {{ res.check_in }} to {{ res.check_out }}
+                                                    </div>
+                                                </div>
+                                                <span class="badge bg-primary">{{ res.get_status_display }}</span>
+                                            </div>
+                                            <div class="text-muted small mt-1">
+                                                Floor {{ res.room.floor }} | Beds: {{ res.room.beds }}
+                                            </div>
+                                            <div class="small mt-2">
+                                                Total: €{{ res.total_charges }}</div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted mb-0">You do not have any reservations yet.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Edit Profile Section (for guest and staff) -->
+                    {% if form and user_type != 'admin' %}
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h4 class="mb-0">
+                                <i class="bi bi-pencil-square"></i> Edit Profile Information
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    {% for error in form.non_field_errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endif %}
+
+                            <form method="post" class="profile-form">
+                                {% csrf_token %}
+                                
+                                <!-- Guest Form Fields -->
+                                {% if user_type == 'guest' %}
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="id_first_name" class="form-label">First Name</label>
+                                            {{ form.first_name }}
+                                            {% if form.first_name.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.first_name.errors.0 }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="id_last_name" class="form-label">Last Name</label>
+                                            {{ form.last_name }}
+                                            {% if form.last_name.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.last_name.errors.0 }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="id_phone" class="form-label">Phone Number</label>
+                                        {{ form.phone }}
+                                        {% if form.phone.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.phone.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="id_id_document" class="form-label">Guest ID</label>
+                                        {{ form.id_document }}
+                                        {% if form.id_document.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.id_document.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="id_preferences" class="form-label">Your Preferences</label>
+                                        {{ form.preferences }}
+                                        <small class="form-text text-muted d-block mt-2">
+                                            e.g., room type preferences, bed size, floor preference, etc.
+                                        </small>
+                                        {% if form.preferences.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.preferences.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="id_special_requests" class="form-label">Special Requests</label>
+                                        {{ form.special_requests }}
+                                        <small class="form-text text-muted d-block mt-2">
+                                            Let us know about any special requests or requirements.
+                                        </small>
+                                        {% if form.special_requests.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.special_requests.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+
+                                <!-- Staff Form Fields -->
+                                {% if user_type == 'staff' %}
+                                    <div class="mb-3">
+                                        <label for="id_name" class="form-label">Full Name</label>
+                                        {{ form.name }}
+                                        {% if form.name.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.name.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="id_email" class="form-label">Email Address</label>
+                                        {{ form.email }}
+                                        <small class="form-text text-muted d-block mt-2">
+                                            Email address cannot be changed.
+                                        </small>
+                                        {% if form.email.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.email.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="id_role" class="form-label">Role</label>
+                                        {{ form.role }}
+                                        <small class="form-text text-muted d-block mt-2">
+                                            Role is assigned by administrator.
+                                        </small>
+                                        {% if form.role.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.role.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-circle"></i> Save Changes
+                                    </button>
+                                    <a href="{% url 'home' %}" class="btn btn-secondary">
+                                        <i class="bi bi-arrow-left"></i> Back to Home
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Change Password Section -->
+                    {% if user_type == 'guest' or user_type == 'staff' or user_type == 'admin' %}
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-warning text-dark">
+                            <h4 class="mb-0">
+                                <i class="bi bi-shield-lock"></i> Change Password
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted mb-4">
+                                Update your password to keep your account secure.
+                            </p>
+                            <a href="{% url 'change_password' %}" class="btn btn-warning">
+                                <i class="bi bi-key"></i> Change Password
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const silverBar = document.querySelector('.progress-bar-silver');
+            if (silverBar) {
+                silverBar.style.width = '{{ silver_progress }}' + '%';
+            }
+            const goldBar = document.querySelector('.progress-bar-gold');
+            if (goldBar) {
+                goldBar.style.width = '{{ gold_progress }}' + '%';
+            }
+        });
+    </script>
+{% endblock %}

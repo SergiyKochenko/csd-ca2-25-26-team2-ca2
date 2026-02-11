@@ -1,0 +1,54 @@
+---
+name: "User Story"
+description: "Propose a new user story for the project."
+title: "[USER STORY] <short description>"
+labels: [user story]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## User Story
+        Please use the format below to describe your user story.
+  - type: input
+    id: as_a
+    attributes:
+      label: "As a..."
+      description: "Who is the user or role?"
+      placeholder: "As a hotel guest"
+    validations:
+      required: true
+  - type: input
+    id: i_want
+    attributes:
+      label: "I want to..."
+      description: "What does the user want to do?"
+      placeholder: "I want to view my reservation details"
+    validations:
+      required: true
+  - type: input
+    id: so_that
+    attributes:
+      label: "So that..."
+      description: "What is the benefit or value?"
+      placeholder: "So that I can confirm my booking information"
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: "Acceptance Criteria"
+      description: "List the conditions that must be met for this story to be complete."
+      placeholder: |
+        - The guest can see all reservation details
+        - The information is accurate and up to date
+    validations:
+      required: true
+  - type: textarea
+    id: additional
+    attributes:
+      label: "Additional context"
+      description: "Add any other context, notes, or attachments."
+      placeholder: "Related issues, screenshots, or references."
+    validations:
+      required: false

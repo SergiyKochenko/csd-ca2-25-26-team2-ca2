@@ -1,0 +1,117 @@
+{# core/templates/header.html #}
+<header class="site-header">
+    <nav class="navbar navbar-expand-xl navbar-dark gi-navbar fixed-top">
+        <div class="container-xxl">
+            <a class="navbar-brand" href="/">Great Irish Hotels</a>
+            <button class="navbar-toggler gi-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav align-items-lg-center mx-auto mb-3 mb-lg-0 gap-lg-1">
+                    <li class="nav-item"><a class="nav-link gi-nav-link" href="/">Home</a></li>
+                    {% if request.user.is_authenticated and request.user.is_staff or staff_role == 'Reception' %}
+                        <li class="nav-item"><a class="nav-link gi-nav-link" href="{% url 'guest_list' %}">Guests</a></li>
+                    {% endif %}
+                    <li class="nav-item"><a class="nav-link gi-nav-link" href="/rooms/">Rooms</a></li>
+                    {% if request.user.is_authenticated and request.user.is_staff or staff_role == 'Reception' %}
+                        <li class="nav-item"><a class="nav-link gi-nav-link" href="{% url 'reservation_list' %}">Reservations</a></li>
+                        <li class="nav-item"><a class="nav-link gi-nav-link" href="{% url 'service_list' %}">Services</a></li>
+                    {% endif %}
+                    {% if request.user.is_authenticated and request.user.is_staff or staff_role == 'Maintenance' or staff_role == 'Reception' or guest_name %}
+                        <li class="nav-item"><a class="nav-link gi-nav-link" href="{% url 'maintenance_list' %}">Maintenance</a></li>
+                    {% endif %}
+                    {% if request.user.is_authenticated and request.user.is_staff or staff_role == 'Housekeeper' or staff_role == 'Reception' or guest_name %}
+                        <li class="nav-item"><a class="nav-link gi-nav-link" href="{% url 'housekeeping_list' %}">Housekeeping</a></li>
+                    {% endif %}
+                    {% if guest_name %}
+                        <li class="nav-item"><a class="nav-link gi-nav-link" href="/services/">Services</a></li>
+                    {% endif %}
+                    <li class="nav-item"><a class="nav-link gi-nav-link" href="{% url 'loyalty' %}">Rewards</a></li>
+                    {% if request.user.is_authenticated and request.user.is_staff %}
+                        <li class="nav-item"><a class="nav-link gi-nav-link" href="/admin-frontend/dashboard/">Admin Dashboard</a></li>
+                    {% endif %}
+                </ul>
+                <div class="header-actions d-flex align-items-center gap-2">
+                    {% if staff_name and staff_role %}
+                        <span class="header-pill">Staff: {{ staff_name }} | Role: {{ staff_role }}</span>
+                        {% if request.resolver_match.url_name != 'user_profile' %}
+                            <a href="{% url 'user_profile' %}" class="header-icon" title="View/Edit Profile">
+                                <i class="bi bi-person-badge"></i>
+                            </a>
+                        {% endif %}
+                        <a href="/logout/" class="btn btn-warning logout-trigger">Logout</a>
+                    {% elif request.user.is_authenticated and request.user.is_staff %}
+                        <span class="header-pill">Logged as Admin</span>
+                        {% if request.resolver_match.url_name != 'user_profile' %}
+                            <a href="{% url 'user_profile' %}" class="header-icon" title="View Profile">
+                                <i class="bi bi-person-badge"></i>
+                            </a>
+                        {% endif %}
+                        <a href="/logout/" class="btn btn-warning logout-trigger">Logout</a>
+                    {% elif guest_name %}
+                        <span class="header-pill">Guest: {{ guest_name }}</span>
+                        {% if request.resolver_match.url_name != 'user_profile' %}
+                            <a href="{% url 'user_profile' %}" class="header-icon" title="View/Edit Profile">
+                                <i class="bi bi-person-badge"></i>
+                            </a>
+                        {% endif %}
+                        <a href="/logout/" class="btn btn-warning logout-trigger">Logout</a>
+                    {% else %}
+                        <div class="dropdown">
+                            <a class="btn btn-light dropdown-toggle" href="#" role="button" id="loginDropdown" data-bs-toggle="dropdown" aria-expanded="false">Login</a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="loginDropdown">
+                                <li><a class="dropdown-item" href="/admin-frontend/login/">Admin Login (Dashboard)</a></li>
+                                <li><a class="dropdown-item" href="/housekeeper_login/">Staff Login</a></li>
+                                <li><a class="dropdown-item" href="/login/">Guest Login (Booking)</a></li>
+                            </ul>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
+<!-- Logout Confirmation Modal -->
+<div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="logoutModalLabel">Confirm Logout</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to logout?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                <button type="button" class="btn btn-warning" id="confirmLogoutBtn">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var logoutLinks = document.querySelectorAll('.logout-trigger');
+    var logoutModalEl = document.getElementById('logoutModal');
+    var logoutModal = new bootstrap.Modal(logoutModalEl);
+    var confirmBtn = document.getElementById('confirmLogoutBtn');
+    var logoutHref = '/logout/';
+    logoutLinks.forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            logoutModal.show();
+        });
+    });
+    confirmBtn.addEventListener('click', function() {
+        window.location.href = logoutHref;
+    });
+    // Fix: Remove modal backdrop if modal is hidden (NO or close)
+    logoutModalEl.addEventListener('hidden.bs.modal', function () {
+        var backdrops = document.querySelectorAll('.modal-backdrop');
+        backdrops.forEach(function(bd) { bd.parentNode.removeChild(bd); });
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+    });
+});
+</script>

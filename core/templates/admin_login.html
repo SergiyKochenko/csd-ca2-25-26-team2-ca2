@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Login | Great Irish Hotels{% endblock %}
+
+{% block content %}
+    {% include "header.html" %}
+
+    <main class="flex-grow-1 pt-5 mt-4">
+        <section class="auth-section py-5">
+            <div class="container py-4">
+                <div class="row g-4 align-items-center">
+                    <div class="col-12 col-lg-6">
+                        <div class="auth-visual h-100">
+                            <p class="text-uppercase small fw-semibold mb-2">Secure operations</p>
+                            <h2 class="display-6 fw-bold mb-3">Control the Great Irish Hotels experience</h2>
+                            <p class="mb-4">Sign in to access executive dashboards, manage reservations in real time, and monitor the performance of every property from a single command center.</p>
+                            <ul class="list-unstyled mb-0">
+                                <li class="d-flex align-items-center mb-2"><span class="badge rounded-pill bg-light text-dark me-3">1</span> Approve high-priority service requests</li>
+                                <li class="d-flex align-items-center mb-2"><span class="badge rounded-pill bg-light text-dark me-3">2</span> Review revenue and occupancy analytics</li>
+                                <li class="d-flex align-items-center"><span class="badge rounded-pill bg-light text-dark me-3">3</span> Coordinate staff workflows instantly</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <div class="card auth-card shadow-lg mx-auto">
+                            <div class="card-body p-4 p-md-5">
+                                <h2 class="h3 text-center fw-bold mb-4">Admin Login</h2>
+                                {% if form.errors %}
+                                    <div class="alert alert-danger">Invalid credentials. Please try again.</div>
+                                {% endif %}
+                                <form method="post" class="auth-form">
+                                    {% csrf_token %}
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control" id="username" name="username" placeholder="Username" required autofocus>
+                                        <label for="username">Username</label>
+                                    </div>
+                                    <div class="form-floating mb-4">
+                                        <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                                        <label for="password">Password</label>
+                                    </div>
+                                    <button type="submit" class="btn btn-gradient w-100 py-2">Login</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+{% endblock %}

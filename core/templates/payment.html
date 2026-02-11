@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% load custom_filters %}
+{% block title %}Payment · Great Irish Hotels{% endblock %}
+{% block body_class %}payment-page bg-light{% endblock %}
+{% block extra_head %}{% endblock %}
+
+{% block content %}
+<main class="container py-5" style="margin-top:80px;" data-client-secret="{{ client_secret|default:'' }}" data-stripe-pk="{{ stripe_public_key|default:'' }}">
+    {% if error_message %}
+    <div class="alert alert-warning shadow-sm" role="alert">
+        <div class="d-flex align-items-start gap-2">
+            <i class="bi bi-exclamation-triangle-fill text-warning fs-4"></i>
+            <div>
+                <div class="fw-semibold mb-1">Payment is not ready yet</div>
+                <div>{{ error_message }}</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row g-4 align-items-start">
+        <div class="col-lg-5">
+            <div class="pay-hero mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="badge">Secure Checkout</span>
+                    <span class="badge">TEST MODE</span>
+                </div>
+                <h2 class="h4 mb-1">{{ room.number|default:"Room" }}{% if room.type %} · {{ room.type }}{% endif %}</h2>
+                <div class="price mb-2">€{{ amount_eur|floatformat:2|default:"--" }}</div>
+                <p class="meta mb-0">Price for your selected stay. Final payment is processed by Stripe.</p>
+            </div>
+
+            <div class="summary-card p-3 bg-white">
+                <div class="row row-cols-2 g-2 mb-2">
+                    <div>
+                        <div class="text-uppercase text-muted small">Check-in</div>
+                        <div class="fw-semibold">{{ check_in|default:"--" }}</div>
+                    </div>
+                    <div class="text-end">
+                        <div class="text-uppercase text-muted small">Check-out</div>
+                        <div class="fw-semibold">{{ check_out|default:"--" }}</div>
+                    </div>
+                    <div>
+                        <div class="text-uppercase text-muted small">Nights</div>
+                        <div class="fw-semibold">{{ nights|default:"--" }}</div>
+                    </div>
+                    <div class="text-end">
+                        <div class="text-uppercase text-muted small">Nightly</div>
+                        {% if discount_percentage > 0 %}
+                            <div class="fw-semibold text-success">€{{ room_rate|floatformat:2 }}</div>
+                            <small class="text-muted"><del>€{{ base_rate|floatformat:2 }}</del></small>
+                            <small class="text-success fw-semibold">-{{ discount_percentage }}% using {{ points_redeemed|default:35 }} points</small>
+                        {% else %}
+                            <div class="fw-semibold">€{{ room_rate|floatformat:2|default:"--" }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if can_redeem_points %}
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="redeemToggle" name="redeem_points" {% if redeem_selected %}checked{% endif %}>
+                    <label class="form-check-label" for="redeemToggle">Redeem 35 points for 10% off</label>
+                    <div class="small text-muted">Current balance: {{ guest_points|default:0 }} pts</div>
+                </div>
+                {% endif %}
+                <div class="row row-cols-2 g-2 align-items-center border-top pt-2 mb-2">
+                    <div>
+                        <div class="text-uppercase text-muted small">Total</div>
+                        <div class="fw-semibold">€{{ discounted_total|floatformat:2|default:amount_eur }}</div>
+                        <small class="text-muted">{{ nights }} night{% if nights|default:1 > 1 %}s{% endif %} × €{{ room_rate|floatformat:2 }}</small>
+                    </div>
+                    <div class="text-end">
+                        {% if discount_percentage > 0 %}
+                            <div class="text-muted small">Was <del>€{{ base_total|floatformat:2 }}</del></div>
+                            <div class="text-success fw-semibold">Saved {{ discount_percentage }}%</div>
+                        {% else %}
+                            <div class="text-muted small">Base total €{{ base_total|floatformat:2 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="border-top pt-2 d-flex gap-2 flex-wrap">
+                    <span class="badge bg-light text-dark border">Visa</span>
+                    <span class="badge bg-light text-dark border">MasterCard</span>
+                    <span class="badge bg-light text-dark border">Contactless</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="form-card bg-white p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="badge bg-primary-subtle text-primary"><i class="bi bi-envelope me-1"></i>Contact info</span>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" disabled>Pay with Link</button>
+                </div>
+
+                <form id="redeem-toggle-form" method="post" action="{% url 'start_payment' %}" class="d-none">
+                    {% csrf_token %}
+                    <input type="hidden" name="room_id" value="{{ room.id|default:room_id }}">
+                    <input type="hidden" name="check_in" value="{{ check_in }}">
+                    <input type="hidden" name="check_out" value="{{ check_out }}">
+                    <input type="hidden" name="payment_method" value="online">
+                    <input type="hidden" name="id_document" value="{{ id_document }}">
+                    <input type="hidden" name="redeem_points" value="true">
+                </form>
+
+                <form id="stripe-payment-form" method="post" action="{% url 'start_payment' %}" class="row g-3">
+                    {% csrf_token %}
+                    <input type="hidden" name="room_id" value="{{ room.id|default:room_id }}">
+                    <input type="hidden" name="check_in" value="{{ check_in }}">
+                    <input type="hidden" name="check_out" value="{{ check_out }}">
+                    <input type="hidden" name="payment_method" value="online">
+                    <input type="hidden" name="id_document" value="{{ id_document }}">
+
+                    <div class="col-12">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="billing_email" placeholder="email@example.com" value="{{ request.user.email|default:'' }}">
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Card information</label>
+                        <div id="card-element"></div>
+                        <div class="form-text">Securely collected with Stripe Elements (no postal code required).</div>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Cardholder name</label>
+                        <input class="form-control" type="text" name="billing_name" placeholder="Full name on card" value="{{ guest_name|default:"" }}">
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Country or region</label>
+                        <select class="form-select" name="billing_country">
+                            <option value="Ireland">Ireland</option>
+                            <option value="United Kingdom">United Kingdom</option>
+                            <option value="United States">United States</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 form-check">
+                        <input class="form-check-input" type="checkbox" value="true" id="saveInfo" disabled>
+                        <label class="form-check-label" for="saveInfo">Save my information for faster checkout.</label>
+                    </div>
+
+                    <div class="col-12">
+                        <button type="submit" id="pay-button" class="btn pay-btn w-100 text-white" {% if error_message or not client_secret %}disabled{% endif %}>
+                            Pay €{{ discounted_total|floatformat:2|default:amount_eur }}
+                        </button>
+                    </div>
+
+                    <div class="col-12">
+                        {% if error_message %}
+                            <div class="text-danger">Fix the issue above, then try again.</div>
+                        {% else %}
+                            <div class="text-muted">Card is processed on this page via Stripe Elements.</div>
+                        {% endif %}
+                        <div id="card-errors" class="text-danger" role="alert"></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+{% block extra_js %}
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+(function(){
+    const container = document.querySelector('main[data-client-secret]');
+    if(!container) return;
+    const clientSecret = container.dataset.clientSecret;
+    const stripePk = container.dataset.stripePk;
+    if(!clientSecret || !stripePk) return;
+
+    const stripe = Stripe(stripePk);
+    const elements = stripe.elements({appearance:{theme:'stripe'}});
+    const card = elements.create('card', {hidePostalCode: true});
+    card.mount('#card-element');
+
+    const form = document.getElementById('stripe-payment-form');
+    const payBtn = document.getElementById('pay-button');
+    const errorBox = document.getElementById('card-errors');
+    const redeemToggle = document.getElementById('redeemToggle');
+    const redeemForm = document.getElementById('redeem-toggle-form');
+    const redeemInput = redeemForm ? redeemForm.querySelector('input[name="redeem_points"]') : null;
+
+    if(redeemToggle && redeemForm && redeemInput){
+        redeemToggle.addEventListener('change', function(){
+            // Enable or disable redeem flag based on checkbox state then repost to recalc PaymentIntent
+            if(this.checked){
+                redeemInput.disabled = false;
+            } else {
+                redeemInput.disabled = true;
+            }
+            redeemForm.submit();
+        });
+    }
+
+    form.addEventListener('submit', async function(e){
+        e.preventDefault();
+        if(!payBtn) return;
+        payBtn.disabled = true;
+        payBtn.textContent = 'Processing...';
+        errorBox.textContent = '';
+
+        const billingDetails = {
+            name: form.querySelector('[name="billing_name"]').value,
+            email: form.querySelector('[name="billing_email"]').value
+        };
+
+        const {error, paymentIntent} = await stripe.confirmCardPayment(clientSecret, {
+            payment_method: {
+                card: card,
+                billing_details: billingDetails
+            }
+        });
+
+        if(error){
+            errorBox.textContent = error.message || 'Payment failed. Please try again.';
+            payBtn.disabled = false;
+            payBtn.textContent = 'Pay';
+            return;
+        }
+
+        if(paymentIntent && paymentIntent.status === 'succeeded'){
+            window.location.href = `/payment/success/?payment_intent=${paymentIntent.id}`;
+        } else {
+            errorBox.textContent = 'Payment did not complete. Please try again.';
+            payBtn.disabled = false;
+            payBtn.textContent = 'Pay';
+        }
+    });
+})();
+</script>
+{% endblock %}

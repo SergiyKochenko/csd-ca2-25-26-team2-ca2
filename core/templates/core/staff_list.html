@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Staff - Hotel Management{% endblock %}
+
+{% block content %}
+{% include "header.html" %}
+
+<main class="container py-5 guests-management">
+    <section class="guest-management-hero rounded-4 shadow-sm p-4 p-lg-5 mb-4">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-8">
+                <p class="text-uppercase text-white-50 fw-semibold mb-2">Operations</p>
+                <h2 class="text-white mb-3">Staff Management</h2>
+                <p class="text-white-75 mb-0">Create, assign roles, and manage staff accounts.</p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <a href="{% url 'staff_create' %}" class="btn btn-light rounded-pill px-4">
+                    <i class="bi bi-plus-circle me-2"></i>Add Staff
+                </a>
+            </div>
+        </div>
+    </section>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if staffs %}
+        <div class="table-responsive card shadow-sm border-0 rounded-4 overflow-hidden">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for staff in staffs %}
+                        <tr>
+                            <td>{{ staff.name }}</td>
+                            <td>{{ staff.email }}</td>
+                            <td>{% if staff.role %}{{ staff.role.name }}{% endif %}</td>
+                            <td>
+                                <div class="d-inline-flex gap-2">
+                                    <a href="{% url 'staff_detail' staff.id %}" class="btn btn-sm btn-outline-primary" title="View">
+                                        <i class="bi bi-eye me-1"></i>View
+                                    </a>
+                                    <a href="{% url 'staff_update' staff.id %}" class="btn btn-sm btn-outline-warning" title="Edit">
+                                        <i class="bi bi-pencil me-1"></i>Edit
+                                    </a>
+                                    <a href="{% url 'staff_delete' staff.id %}" class="btn btn-sm btn-outline-danger" title="Delete">
+                                        <i class="bi bi-trash me-1"></i>Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center py-5">
+            <p>No staff found. <a href="{% url 'staff_create' %}">Create one</a></p>
+        </div>
+    {% endif %}
+</main>
+
+{% endblock %}

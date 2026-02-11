@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Guests - Hotel Management{% endblock %}
+
+{% block content %}
+{% include "header.html" %}
+
+<main class="container py-5 guests-management">
+    <section class="guest-management-hero rounded-4 shadow-sm p-4 p-lg-5 mb-4">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-8">
+                <p class="text-uppercase text-white-50 fw-semibold mb-2">Operations</p>
+                <h2 class="text-white mb-3">Guest Management</h2>
+                <p class="text-white-75 mb-0">Review guest details, points balances, and take quick actions on guest records.</p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <a href="{% url 'guest_create' %}" class="btn btn-light rounded-pill px-4">
+                    <i class="bi bi-plus-circle me-2"></i>Add Guest
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="guest-stats row row-cols-1 row-cols-md-3 g-3 mb-4">
+        <div class="col">
+            <div class="guest-stat-card rounded-4 p-4 h-100">
+                <p class="text-muted text-uppercase small mb-1">Total Guests</p>
+                <h3 class="mb-0">{{ guest_stats.total|default:0 }}</h3>
+            </div>
+        </div>
+        <div class="col">
+            <div class="guest-stat-card rounded-4 p-4 h-100">
+                <p class="text-muted text-uppercase small mb-1">Redeem Ready (35+ pts)</p>
+                <h3 class="mb-0">{{ guest_stats.redeem_ready|default:0 }}</h3>
+            </div>
+        </div>
+        <div class="col">
+            <div class="guest-stat-card rounded-4 p-4 h-100">
+                <p class="text-muted text-uppercase small mb-1">With Preferences</p>
+                <h3 class="mb-0">{{ guest_stats.with_preferences|default:0 }}</h3>
+            </div>
+        </div>
+    </section>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if guests %}
+        <div class="table-responsive card shadow-sm border-0 rounded-4 overflow-hidden">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Points</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for guest in guests %}
+                        <tr>
+                            <td>{{ guest.first_name }} {{ guest.last_name }}</td>
+                            <td>{{ guest.email }}</td>
+                            <td>{{ guest.phone }}</td>
+                            <td>
+                                <span class="badge bg-primary">{{ guest.loyalty_points|default:0 }} pts</span>
+                                {% if guest.loyalty_points|default:0 >= 35 %}
+                                    <span class="badge bg-success ms-1">Redeemable</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="guest-actions d-inline-flex gap-2">
+                                    <a href="{% url 'guest_detail' guest.id %}" class="btn btn-sm btn-outline-primary" title="View">
+                                        <i class="bi bi-eye me-1"></i>View
+                                    </a>
+                                    <a href="{% url 'guest_update' guest.id %}" class="btn btn-sm btn-outline-warning" title="Edit">
+                                        <i class="bi bi-pencil me-1"></i>Edit
+                                    </a>
+                                    <a href="{% url 'guest_delete' guest.id %}" class="btn btn-sm btn-outline-danger" title="Delete">
+                                        <i class="bi bi-trash me-1"></i>Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center py-5">
+            <p>No guests found. <a href="{% url 'guest_create' %}">Create one</a></p>
+        </div>
+    {% endif %}
+</main>
+
+{% endblock %}

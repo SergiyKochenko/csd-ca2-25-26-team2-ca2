@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rewards Program - Great Irish Hotels</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="loyalty-body">
+    {% include "header.html" %}
+
+    <main class="loyalty-page">
+        <section class="loyalty-hero text-white">
+            <div class="container py-5">
+                <div class="row align-items-center gy-4">
+                    <div class="col-lg-7">
+                        <span class="loyalty-pill">Rewards</span>
+                        <h1 class="display-5 fw-bold mb-2">Points Rewards Program</h1>
+                        <p class="lead text-white-75 mb-4">Earn points with every completed stay and redeem them for instant savings on your next booking.</p>
+                        <div class="d-flex flex-wrap gap-3">
+                            <a class="btn btn-light text-primary fw-semibold" href="/rooms/">Start booking</a>
+                            <a class="btn btn-outline-light fw-semibold" href="#faq">See how it works</a>
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="loyalty-hero-card bg-white shadow-sm p-4 rounded-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <p class="text-uppercase small text-muted mb-1">Current balance</p>
+                                    <h3 class="mb-1 text-primary">{{ points_balance|default:0 }} pts</h3>
+                                    <p class="text-muted mb-0">Live when you are signed in.</p>
+                                </div>
+                                {% if can_redeem_points %}
+                                    <span class="badge bg-success">Ready to redeem</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Keep earning</span>
+                                {% endif %}
+                            </div>
+                            {% with target_points=redeem_cost|default_if_none:35 current_points=points_balance|default_if_none:0 %}
+                                {% if target_points|add:'0' > 0 %}
+                                    {% widthratio current_points target_points 100 as progress_value %}
+                                {% else %}
+                                    {% with 0 as progress_value %}{% endwith %}
+                                {% endif %}
+                                {% with progress_value|default:0 as progress_pct %}
+                                    <div class="loyalty-progress mb-2">
+                                        <div class="loyalty-progress-bar" style="--progress: {{ progress_pct }}%;"></div>
+                                    </div>
+                                    <div class="d-flex justify-content-between small text-muted">
+                                        <span>{{ current_points }} pts</span>
+                                        <span>{{ target_points }} pts unlocks {{ discount_percent|default:10 }}% off</span>
+                                    </div>
+                                {% endwith %}
+                            {% endwith %}
+                            {% if can_redeem_points %}
+                                <p class="mt-3 mb-0 text-success fw-semibold"><i class="bi bi-check-circle me-1"></i>You can redeem now at checkout.</p>
+                            {% else %}
+                                <p class="mt-3 mb-0 text-muted">You need {{ points_needed|default:redeem_cost }} more points to redeem.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="loyalty-hero-stats mt-4 d-flex flex-wrap gap-3">
+                    <div class="loyalty-mini-card">
+                        <div class="d-flex align-items-center gap-2 mb-1"><span class="loyalty-dot"></span><small class="text-uppercase fw-semibold">Earn rate</small></div>
+                        <div class="fw-bold">{{ earn_rate|default:5 }} pts / stay</div>
+                        <small class="text-white-75">Posted at checkout automatically.</small>
+                    </div>
+                    <div class="loyalty-mini-card">
+                        <div class="d-flex align-items-center gap-2 mb-1"><span class="loyalty-dot"></span><small class="text-uppercase fw-semibold">Redeem at</small></div>
+                        <div class="fw-bold">{{ redeem_cost|default:35 }} pts</div>
+                        <small class="text-white-75">Unlocks {{ discount_percent|default:10 }}% off.</small>
+                    </div>
+                    <div class="loyalty-mini-card">
+                        <div class="d-flex align-items-center gap-2 mb-1"><span class="loyalty-dot"></span><small class="text-uppercase fw-semibold">Balance</small></div>
+                        <div class="fw-bold">{{ points_balance|default:0 }} pts</div>
+                        <small class="text-white-75">Live when signed in.</small>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="container loyalty-content py-5">
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="loyalty-card h-100 shadow-sm">
+                        <div class="d-flex">
+                            <div class="loyalty-icon text-primary"><i class="bi bi-rocket-takeoff"></i></div>
+                            <div>
+                                <p class="text-uppercase small text-muted mb-1">Earn</p>
+                                <h5 class="mb-1">{{ earn_rate|default:5 }} points</h5>
+                                <p class="mb-0 text-muted">Automatically awarded after each completed stay.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="loyalty-card h-100 shadow-sm">
+                        <div class="d-flex">
+                            <div class="loyalty-icon text-success"><i class="bi bi-stars"></i></div>
+                            <div>
+                                <p class="text-uppercase small text-muted mb-1">Redeem</p>
+                                <h5 class="mb-1">{{ redeem_cost|default:35 }} points</h5>
+                                <p class="mb-0 text-muted">Redeem for a {{ discount_percent|default:10 }}% discount on your next booking.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="loyalty-card h-100 shadow-sm">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <p class="text-uppercase small text-muted mb-1">Your balance</p>
+                                <h4 class="mb-1 text-primary">{{ points_balance|default:0 }} pts</h4>
+                                <p class="mb-0 text-muted">Logged-in guests see live balance here.</p>
+                            </div>
+                            {% if can_redeem_points %}
+                                <span class="badge bg-success">Redeemable</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Keep earning</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 align-items-stretch mb-4">
+                <div class="col-lg-7">
+                    <div class="loyalty-panel shadow-sm h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="mb-0">How it works</h4>
+                            <span class="badge bg-light text-primary border">Instant rewards</span>
+                        </div>
+                        <ol class="loyalty-steps mb-4">
+                            <li>Book and complete your stay — earn {{ earn_rate|default:5 }} points automatically.</li>
+                            <li>Once you reach {{ redeem_cost|default:35 }} points, you are eligible to redeem.</li>
+                            <li>During booking, select "Use points" to unlock a {{ discount_percent|default:10 }}% discount.</li>
+                            <li>We deduct {{ redeem_cost|default:35 }} points at redemption and award new points after checkout.</li>
+                        </ol>
+                        <div class="alert alert-info d-flex align-items-center mb-0">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <div>Points never expire while your account stays active.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="loyalty-cta shadow-sm h-100 text-white">
+                        <h5 class="mb-3"><i class="bi bi-lightning-charge me-2"></i>Ready to redeem?</h5>
+                        {% if can_redeem_points %}
+                            <p class="mb-4">Great news! You have enough points to redeem {{ redeem_cost|default:35 }} for {{ discount_percent|default:10 }}% off your next stay.</p>
+                            <a href="/rooms/" class="btn btn-light text-primary fw-semibold">Book a room</a>
+                        {% else %}
+                            <p class="mb-4">You need {{ points_needed|default:redeem_cost }} more points to redeem. Complete your next stay to close the gap.</p>
+                            <a href="/rooms/" class="btn btn-outline-light fw-semibold">Explore rooms</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="loyalty-panel shadow-sm mb-4" id="faq">
+                <h4 class="mb-3">FAQ</h4>
+                <div class="accordion" id="pointsFaq">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faqOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faqOneCollapse" aria-expanded="true" aria-controls="faqOneCollapse">
+                                When are points awarded?
+                            </button>
+                        </h2>
+                        <div id="faqOneCollapse" class="accordion-collapse collapse show" aria-labelledby="faqOne" data-bs-parent="#pointsFaq">
+                            <div class="accordion-body">
+                                Points are awarded automatically when a reservation is marked as completed (checked-out).
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faqTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqTwoCollapse" aria-expanded="false" aria-controls="faqTwoCollapse">
+                                How do I redeem points?
+                            </button>
+                        </h2>
+                        <div id="faqTwoCollapse" class="accordion-collapse collapse" aria-labelledby="faqTwo" data-bs-parent="#pointsFaq">
+                            <div class="accordion-body">
+                                When booking, select the "Use points" option in the room modal. If you have {{ redeem_cost|default:35 }} points or more, we apply a {{ discount_percent|default:10 }}% discount and deduct {{ redeem_cost|default:35 }} points.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faqThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqThreeCollapse" aria-expanded="false" aria-controls="faqThreeCollapse">
+                                Do points expire?
+                            </button>
+                        </h2>
+                        <div id="faqThreeCollapse" class="accordion-collapse collapse" aria-labelledby="faqThree" data-bs-parent="#pointsFaq">
+                            <div class="accordion-body">
+                                Points do not expire while your account remains active. If your account is inactive for an extended period, points may be reviewed.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <a href="/rooms/" class="btn btn-primary btn-lg px-4"><i class="bi bi-door-open me-2"></i>Start booking</a>
+            </div>
+        </section>
+    </main>
+
+    {% include "footer.html" %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

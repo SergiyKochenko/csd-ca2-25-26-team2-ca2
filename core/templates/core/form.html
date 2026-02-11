@@ -1,0 +1,337 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} - Hotel Management{% endblock %}
+
+{% block content %}
+{% include "header.html" %}
+
+<main class="container py-5 mt-5 pt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        <strong>{% if message.tags == 'error' %}Error!{% elif message.tags == 'success' %}Success!{% elif message.tags == 'warning' %}Warning!{% else %}Info{% endif %}</strong>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>Form Error:</strong>
+                    <ul class="mb-0">
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endif %}
+
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4">
+                    <h2 class="card-title mb-4 text-center">{{ title }}</h2>
+                    
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        
+                        {% for field in form %}
+                            <div class="mb-3">
+                                {% if field.label %}
+                                    <label for="{{ field.id_for_label }}" class="form-label">
+                                        {{ field.label }}
+                                        {% if field.field.required %}<span class="text-danger" title="This field is required">*</span>{% endif %}
+                                    </label>
+                                {% endif %}
+                                
+                                {% if field.field.widget.input_type == "checkbox" %}
+                                    <div class="form-check">
+                                        {{ field }}
+                                        {% if field.label %}<label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{% endif %}
+                                    </div>
+                                {% elif field.field.widget.input_type == "textarea" %}
+                                    {{ field }}
+                                {% else %}
+                                    {{ field }}
+                                {% endif %}
+                                
+                                {% if field.errors %}
+                                    <div class="alert alert-danger alert-sm mt-2 py-2 px-3" role="alert" style="font-size: 0.875rem;">
+                                        <i class="bi bi-exclamation-circle"></i>
+                                        {% for error in field.errors %}
+                                            <span>{{ error }}</span>
+                                            {% if not forloop.last %}<br>{% endif %}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                
+                                {% if field.help_text %}
+                                    <small class="form-text text-muted d-block mt-1">
+                                        <i class="bi bi-info-circle"></i> {{ field.help_text|safe }}
+                                    </small>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Points Redemption Information -->
+                        {% if "reservation" in title|lower %}
+                            <div id="pointsDiscountInfo" class="alert alert-info d-none mb-3" role="alert" style="display: none;">
+                                <div class="d-flex align-items-start">
+                                    <i class="bi bi-stars me-3 mt-1" style="color: #FFB81C; font-size: 1.5rem;"></i>
+                                    <div>
+                                        <h6 class="mb-2"><strong>Points Discount Available!</strong></h6>
+                                        <p id="pointsDiscountMessage" class="mb-0"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+                            <a href="javascript:history.back()" class="btn btn-secondary btn-lg">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Flatpickr for all date inputs (check_in, check_out, date, date_requested, etc.)
+        const dateInputs = document.querySelectorAll('input[type="date"]');
+        const checkInInput = document.querySelector('input[name="check_in"]');
+        const checkOutInput = document.querySelector('input[name="check_out"]');
+        const currentReservationId = "{{ current_reservation_id|default:'' }}";
+        const currentRoomId = "{{ current_room_id|default:'' }}";
+        const roomSelect = document.querySelector('select[name="room"]');
+        const guestSelect = document.querySelector('select[name="guest"]');
+        const pointsDiscountInfo = document.getElementById('pointsDiscountInfo');
+        const pointsDiscountMessage = pointsDiscountInfo ? document.getElementById('pointsDiscountMessage') : null;
+        
+        // Initialize check_in and check_out with basic settings first
+        if (checkInInput) {
+            flatpickr(checkInInput, {
+                dateFormat: 'Y-m-d',
+                minDate: 'today'
+            });
+        }
+        if (checkOutInput) {
+            flatpickr(checkOutInput, {
+                dateFormat: 'Y-m-d',
+                minDate: 'today'
+            });
+        }
+        
+        // Initialize other date inputs
+        dateInputs.forEach(input => {
+            if (!input.id.includes('checkin') && !input.id.includes('checkout') && 
+                input.name !== 'check_in' && input.name !== 'check_out') {
+                flatpickr(input, {
+                    dateFormat: 'Y-m-d',
+                    minDate: 'today'
+                });
+            }
+        });
+        
+        // Handle guest selection and display points redemption info
+        if (guestSelect && pointsDiscountInfo) {
+            function updateGuestPointsInfo() {
+                const guestId = guestSelect.value;
+                if (!guestId) {
+                    pointsDiscountInfo.style.display = 'none';
+                    pointsDiscountInfo.classList.add('d-none');
+                    return;
+                }
+                
+                fetch(`/api/guest-points/${guestId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.can_redeem && data.discount_percent > 0) {
+                            pointsDiscountMessage.innerHTML = `
+                                Guest can redeem <strong>${data.redeem_cost} points</strong> for a <strong>${data.discount_percent}% discount</strong> on this reservation.<br>
+                                Current balance: <strong>${data.points} pts</strong>.
+                            `;
+                            pointsDiscountInfo.style.display = 'block';
+                            pointsDiscountInfo.classList.remove('d-none');
+                        } else {
+                            pointsDiscountInfo.style.display = 'none';
+                            pointsDiscountInfo.classList.add('d-none');
+                        }
+                    })
+                    .catch(err => {
+                        console.log('Could not fetch guest points info:', err);
+                        pointsDiscountInfo.style.display = 'none';
+                        pointsDiscountInfo.classList.add('d-none');
+                    });
+            }
+            
+            guestSelect.addEventListener('change', updateGuestPointsInfo);
+            // Initialize on page load if guest is pre-selected
+            if (guestSelect.value) {
+                updateGuestPointsInfo();
+            }
+        }
+
+        // Get booked dates for the current room if in a reservation form
+        if (roomSelect) {
+            function updateDatePickerConstraints() {
+                const roomId = roomSelect.value;
+                if (!roomId) return;
+
+                // Fetch booked dates for this room
+                fetch(`/api/room-booked-dates/${roomId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.booked_dates) {
+                            const disabledDates = [];
+                            data.booked_dates.forEach(booking => {
+                                // Skip dates from the current reservation if we're editing one
+                                if (currentReservationId) {
+                                    if (booking.id === parseInt(currentReservationId)) {
+                                        return; // Skip this booking
+                                    }
+                                }
+                                
+                                const startDate = new Date(booking.check_in);
+                                const endDate = new Date(booking.check_out);
+                                const currentDate = new Date(startDate);
+                                while (currentDate < endDate) {
+                                    disabledDates.push(new Date(currentDate));
+                                    currentDate.setDate(currentDate.getDate() + 1);
+                                }
+                            });
+
+                            // Re-initialize check_in and check_out pickers with disabled dates
+                            if (checkInInput && checkOutInput) {
+                                if (checkInInput.flatpickr) checkInInput.flatpickr.destroy();
+                                if (checkOutInput.flatpickr) checkOutInput.flatpickr.destroy();
+                                
+                                flatpickr(checkInInput, {
+                                    dateFormat: 'Y-m-d',
+                                    minDate: 'today',
+                                    disable: disabledDates,
+                                    onChange: function(selectedDates) {
+                                        if (selectedDates.length > 0) {
+                                            checkOutInput.flatpickr.set('minDate', selectedDates[0]);
+                                        }
+                                    }
+                                });
+                                
+                                flatpickr(checkOutInput, {
+                                    dateFormat: 'Y-m-d',
+                                    minDate: 'today',
+                                    disable: disabledDates
+                                });
+                            }
+                        }
+                    })
+                    .catch(err => console.log('Could not fetch booked dates:', err));
+            }
+
+            roomSelect.addEventListener('change', updateDatePickerConstraints);
+            // Initialize on page load if room is pre-selected or if we have a current room ID
+            if (roomSelect.value || currentRoomId) {
+                updateDatePickerConstraints();
+            }
+        }
+        
+        // If editing a reservation without room select, directly initialize with booked dates
+        if (!roomSelect && currentRoomId && (checkInInput || checkOutInput)) {
+            fetch(`/api/room-booked-dates/${currentRoomId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.booked_dates) {
+                        const disabledDates = [];
+                        data.booked_dates.forEach(booking => {
+                            // Skip dates from the current reservation if we're editing one
+                            if (currentReservationId && booking.id === parseInt(currentReservationId)) {
+                                return; // Skip this booking
+                            }
+                            
+                            const startDate = new Date(booking.check_in);
+                            const endDate = new Date(booking.check_out);
+                            const currentDate = new Date(startDate);
+                            while (currentDate < endDate) {
+                                disabledDates.push(new Date(currentDate));
+                                currentDate.setDate(currentDate.getDate() + 1);
+                            }
+                        });
+
+                        // Re-initialize with disabled dates
+                        if (checkInInput) {
+                            if (checkInInput.flatpickr) checkInInput.flatpickr.destroy();
+                            flatpickr(checkInInput, {
+                                dateFormat: 'Y-m-d',
+                                minDate: 'today',
+                                disable: disabledDates,
+                                onChange: function(selectedDates) {
+                                    if (selectedDates.length > 0 && checkOutInput && checkOutInput.flatpickr) {
+                                        checkOutInput.flatpickr.set('minDate', selectedDates[0]);
+                                    }
+                                }
+                            });
+                        }
+                        
+                        if (checkOutInput) {
+                            if (checkOutInput.flatpickr) checkOutInput.flatpickr.destroy();
+                            flatpickr(checkOutInput, {
+                                dateFormat: 'Y-m-d',
+                                minDate: 'today',
+                                disable: disabledDates
+                            });
+                        }
+                    }
+                })
+                .catch(err => console.log('Could not fetch booked dates:', err));
+        }
+
+        // Auto-calculate total charges for reservation forms
+        const totalChargesInput = document.querySelector('input[name="total_charges"]');
+        
+        if (roomSelect && checkInInput && checkOutInput && totalChargesInput) {
+            function calculateCharges() {
+                const roomId = roomSelect.value;
+                if (!roomId || !checkInInput.value || !checkOutInput.value) return;
+                
+                const checkIn = new Date(checkInInput.value);
+                const checkOut = new Date(checkOutInput.value);
+                const nights = (checkOut - checkIn) / (1000 * 60 * 60 * 24);
+                
+                if (nights > 0) {
+                    fetch(`/api/room-rate/${roomId}/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.rate) {
+                                totalChargesInput.value = (data.rate * nights).toFixed(2);
+                            }
+                        })
+                        .catch(() => {
+                            console.log('Could not fetch room rate, skipping auto-calculation');
+                        });
+                }
+            }
+            
+            roomSelect.addEventListener('change', calculateCharges);
+            checkInInput.addEventListener('change', calculateCharges);
+            checkOutInput.addEventListener('change', calculateCharges);
+        }
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Staff Details - Hotel Management{% endblock %}
+
+{% block content %}
+{% include "header.html" %}
+
+<main class="container py-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <h2 class="card-title">{{ object.name }}</h2>
+                            <p class="text-muted">Staff ID: {{ object.id }}</p>
+                        </div>
+                        <div class="btn-group">
+                            <a href="{% url 'staff_update' object.id %}" class="btn btn-warning">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                            <a href="{% url 'staff_delete' object.id %}" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Delete
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong>Email:</strong></p>
+                            <p>{{ object.email }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Role:</strong></p>
+                            <p>{% if object.role %}{{ object.role.name }}{% else %}No role assigned{% endif %}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <p><strong>Assigned Tasks:</strong></p>
+                            <p>Use housekeeping and maintenance sections to view assignments.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <a href="{% url 'staff_list' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Staff
+            </a>
+        </div>
+    </div>
+</main>
+
+{% endblock %}
