@@ -403,6 +403,7 @@ def start_payment(request):
 		return redirect('rooms')
 
 	form = PublicReservationRequestForm(request.POST)
+	print("POST data:", dict(request.POST))
 	guest_id = request.session.get('guest_id')
 
 	import logging
@@ -417,6 +418,7 @@ def start_payment(request):
 			return redirect('rooms')
 
 	if not form.is_valid():
+		print("Form errors:", form.errors)
 		errors = '; '.join([f"{k}: {', '.join(v)}" for k, v in form.errors.items()]) if form.errors else 'Invalid input.'
 		return return_error(errors)
 
