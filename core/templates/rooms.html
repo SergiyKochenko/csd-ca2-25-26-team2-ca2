@@ -365,23 +365,27 @@
                 if (paymentMethod === 'online') {
                     // Instead of submitting to /reservations/, submit to /start-payment/ with AJAX for validation
                     e.preventDefault();
-                    
+
                     // Disable submit button
                     var submitBtn = form.querySelector('.booking-submit');
                     if (submitBtn) {
                         submitBtn.disabled = true;
                         submitBtn.textContent = 'Processing...';
                     }
-                    
+
                     // Create FormData from the form
                     var formData = new FormData(form);
-                    
-                    // Send AJAX request to start_payment for validation
+
+                    // Get CSRF token from form
+                    var csrfToken = form.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+                    // Send AJAX request to start_payment for validation, include CSRF token in headers
                     fetch('/start-payment/', {
                         method: 'POST',
                         body: formData,
                         headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': csrfToken
                         },
                         credentials: 'same-origin'
                     })
