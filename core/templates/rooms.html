@@ -114,7 +114,7 @@
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <input type="hidden" name="room_id" value="{{ room.id }}">
+                                                    <input type="hidden" name="room" value="{{ room.id }}">
                                                     <div class="mb-3">
                                                         <label for="checkin{{ room.id }}" class="form-label">Check-in Date</label>
                                                         <input type="text" class="form-control guest-checkin date-input" id="checkin{{ room.id }}" name="check_in" required data-room-id="{{ room.id }}" placeholder="Select date">
