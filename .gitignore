@@ -3,6 +3,9 @@ venv/
 .venv/
 .env/
 
+# Environment files
+.env
+
 # Django database and media
 # db.sqlite3
 # *.sqlite3
